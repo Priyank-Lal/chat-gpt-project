@@ -7,14 +7,28 @@ import {
   X,
   User,
   Trash2,
+  Menu,
+  Trash,
+  MoreHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
-import { getMessages } from "../../store/actions/chatActions";
+import { deleteChat, getMessages } from "../../store/actions/chatActions";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Framer Motion Variants for animations
 const sidebarVariants = {
@@ -78,6 +92,11 @@ const Sidebar = ({
     if (window.innerWidth < 1024) {
       onToggle();
     }
+  };
+
+  const handleDeleteChat = async (chatID) => {
+    await dispatch(deleteChat(chatID));
+    onchatselect(null);
   };
 
   return (
@@ -161,12 +180,13 @@ const Sidebar = ({
                         layout
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
+                        className="relative flex items-center"
                       >
                         <Button
                           variant="ghost"
                           onClick={() => handleChatSelect(chat._id)}
                           className={cn(
-                            "w-full justify-start p-3 h-auto text-left rounded-lg transition-all duration-200 group",
+                            "w-full justify-start  p-3 h-auto text-left rounded-lg transition-all duration-200 group",
                             chat._id === chatID
                               ? "bg-[#2a2a2a] text-white"
                               : "text-gray-300 hover:bg-[#2a2a2a] hover:text-white"
@@ -185,6 +205,37 @@ const Sidebar = ({
                             {chat.title || "New Conversation"}
                           </span>
                         </Button>
+                        {chat._id === chatID && (
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <Trash className="w-8 h-8 opacity-70 hover:text-red-400 rounded-full hover:bg-[#484343] cursor-pointer absolute top-[6px] right-2 p-2 " />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="">
+                                  Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="">
+                                  This action cannot be undone. This will
+                                  permanently delete your Chat and remove data
+                                  from our servers.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteChat(chat._id)}
+                                  variant="destructive"
+                                  className="ml-4 bg-red-600 text-white hover:bg-red-700 dark:hover:bg-red-500 transition-colors duration-200 cursor-pointer"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                       </motion.li>
                     ))}
                     {isCreating && (

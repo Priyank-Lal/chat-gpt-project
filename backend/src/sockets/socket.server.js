@@ -5,6 +5,7 @@ const userModel = require("../models/user.model");
 const messageModel = require("../models/message.model");
 const { generateResponse, generateVector } = require("../services/ai.service");
 const { createMemory, queryMemory } = require("../services/vector.service");
+const { generateImage } = require("../services/imageGeneration.service.js");
 
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
@@ -127,6 +128,38 @@ function initSocketServer(httpServer) {
           text: aiResponse,
         },
       });
+    });
+
+    socket.on("ai-image", async (payload) => {
+      try {
+        const messageFromUser = await messageModel.create({
+          userID: socket.user._id,
+          chatID: payload.chatID,
+          content: payload.prompt,
+          role: "user",
+        });
+
+        socket.emit("user-message", {
+          messageFromUser,
+          tempID: payload.tempID,
+        });
+
+        const imageUrl = await generateImage(payload.prompt);
+
+        const responseToUser = await messageModel.create({
+          userID: socket.user._id,
+          chatID: payload.chatID,
+          content: imageUrl, // store URL as message content
+          role: "model",
+        });
+
+        socket.emit("ai-image-response", {
+          responseToUser,
+        });
+      } catch (err) {
+        console.error("❌ Error in ai-image:", err.message);
+        socket.emit("ai-error", { error: "Failed to generate image" });
+      }
     });
   });
 }

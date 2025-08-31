@@ -82,6 +82,7 @@ const ChatArea = ({
   className = "",
   chatID,
   handleNewChat,
+  handleImageGeneration= ()=>{},
 }) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -220,7 +221,7 @@ const ChatArea = ({
               value={inputMessage}
               setValue={setInputMessage}
               handleKeyPress={handleKeyPress}
-              onSend={handleSendMessage}
+              onSend={handleImageGeneration}
             />
           </div>
         </div>

@@ -48,6 +48,17 @@ const chatSlice = createSlice({
     appendChat: (state, action) => {
       state.chats.unshift(action.payload);
     },
+    removeChat: (state, action) => {
+      const { chatID } = action.payload;
+      const filteredChats = state.chats.filter((chat) => {
+        return chat._id !== chatID;
+      });
+      state.chats = filteredChats;
+    },
+    removeMessages: (state,action)=>{
+        const { chatID } = action.payload;
+        delete state.messages[chatID];
+    }
   },
 });
 
@@ -60,4 +71,6 @@ export const {
   setLoading,
   appendChat,
   setCreating,
+  removeChat,
+  removeMessages
 } = chatSlice.actions;

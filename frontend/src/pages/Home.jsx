@@ -20,14 +20,6 @@ const Home = () => {
 
   const messages = useSelector((state) => state.chat.messages[chatID]);
 
-  const handleNewChat = async () => {
-    const title = prompt("Enter the title of your chat");
-
-    const response = await dispatch(createChat({ title }));
-
-    setChatID(response.chatID);
-  };
-
   async function getUserDetails() {
     await dispatch(getUser());
     await dispatch(getChats());
@@ -56,6 +48,10 @@ const Home = () => {
       );
     });
 
+    tempSocket.on("ai-image-response", ({ responseToUser }) => {
+      console.log(responseToUser);
+      
+    });
     setSocket(tempSocket);
 
     getUserDetails();
@@ -73,6 +69,16 @@ const Home = () => {
     dispatch(appendMessage({ chatID, message: tempMessage }));
 
     socket.emit("ai-message", { chatID, content, tempID });
+  };
+
+  const handleImageGeneration = async (content) => {
+    console.log("Running");
+    
+    socket.emit("ai-image", {
+      chatID,
+      prompt: "An image of an Astronaut",
+    });
+
   };
 
   const handlechatselect = (id) => {
@@ -100,31 +106,42 @@ const Home = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const handleNewChat = async () => {
+    const title = prompt("Enter the title of your chat");
+
+    const response = await dispatch(createChat({ title }));
+
+    handlechatselect(response.chatID);
+  };
+
+
+
   return (
     <>
-    <div className="flex h-screen bg-[#1a1a1a] overflow-hidden">
-      <Sidebar
-        isOpen={sidebarOpen}
-        onToggle={toggleSidebar}
-        chats={chats}
-        chatID={chatID}
-        onchatselect={handlechatselect}
-        onNewChat={handleNewChat}
-      />
+      <div className="flex h-screen bg-[#1a1a1a] overflow-hidden">
+        <Sidebar
+          isOpen={sidebarOpen}
+          onToggle={toggleSidebar}
+          chats={chats}
+          chatID={chatID}
+          onchatselect={handlechatselect}
+          onNewChat={handleNewChat}
+        />
 
-      <ChatArea
-        messages={messages || []}
-        onSendMessage={handleSendMessage}
-        isTyping={isTyping}
-        onToggleSidebar={toggleSidebar}
-        className={`transition-all duration-300 ${
-          sidebarOpen ? "lg:ml-0" : "lg:ml-0"
-        }`}
-        chatID={chatID}
-        chats={chats}
-        handleNewChat={handleNewChat}
-      />
-    </div>
+        <ChatArea
+          messages={messages || []}
+          onSendMessage={handleSendMessage}
+          isTyping={isTyping}
+          onToggleSidebar={toggleSidebar}
+          className={`transition-all duration-300 ${
+            sidebarOpen ? "lg:ml-0" : "lg:ml-0"
+          }`}
+          chatID={chatID}
+          chats={chats}
+          handleNewChat={handleNewChat}
+          handleImageGeneration={handleImageGeneration}
+        />
+      </div>
     </>
   );
 };

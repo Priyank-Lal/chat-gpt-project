@@ -1,5 +1,6 @@
 const { Pinecone } = require("@pinecone-database/pinecone");
 
+
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 
 const chatGptIndex = pc.Index("chat-gpt-project"); // Index matlab jaha par hum apne vectors store karenge

@@ -13,7 +13,7 @@ const createChat = async (req, res) => {
   res.status(201).json({
     message: "Chat Created Successfully",
     chat: {
-      chatID: chat._id,
+      _id: chat._id,
       title: chat.title,
       lastActivity: chat.lastActivity,
     },
@@ -70,4 +70,36 @@ const getMessages = async (req, res) => {
   }
 };
 
-module.exports = { createChat, getChats, getMessages };
+const deleteChat = async (req, res) => {
+  const user = req.user;
+  const { chatID } = req.params;
+
+  try {
+    const deletedChat = await chatModel.findOneAndDelete({
+      _id: chatID,
+      userID: user._id,
+    });
+
+    if (!deletedChat) {
+      return res.status(404).json({
+        message: "No Chat Found to Delete",
+      });
+    }
+
+    const deleteMessages = await messageModel.deleteMany({
+      chatID: chatID,
+      userID: user._id,
+    });
+
+    return res.status(200).json({
+      message: "Deleted Chat and All Messages Successfully",
+    });
+  } catch (error) {
+     return res.status(500).json({
+       message: "An Error Has Occured",
+       error,
+     });
+  }
+};
+
+module.exports = { createChat, getChats, getMessages, deleteChat };
