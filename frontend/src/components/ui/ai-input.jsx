@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { Globe, Paperclip, Plus, Send } from "lucide-react"
+import { Globe, Paperclip, Plus, Send,X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,39 +10,43 @@ function useAutoResizeTextarea({
   maxHeight
 }) {
   const textareaRef = useRef(null)
+  const adjustHeight = useCallback(
+    (reset = false) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
 
-  const adjustHeight = useCallback((reset) => {
-    const textarea = textareaRef.current
-    if (!textarea) return
+      // Reset to minimum height
+      textarea.style.height = `${minHeight}px`;
 
-    if (reset) {
-      textarea.style.height = `${minHeight}px`
-      return
-    }
+      if (reset) {
+        return;
+      }
 
-    textarea.style.height = `${minHeight}px`
-    const newHeight = Math.max(
-      minHeight,
-      Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY)
-    )
+      // Calculate new height based on content, constrained by min/max
+      const newHeight = Math.max(
+        minHeight,
+        Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY)
+      );
 
-    textarea.style.height = `${newHeight}px`
-  }, [minHeight, maxHeight])
-
+      textarea.style.height = `${newHeight}px`;
+    },
+    [minHeight, maxHeight]
+  );
   useEffect(() => {
-    const textarea = textareaRef.current
+    const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = `${minHeight}px`
+      textarea.style.height = `${minHeight}px`;
     }
-  }, [minHeight])
+  }, [minHeight]);
 
+  // Adjust height on window resize
   useEffect(() => {
-    const handleResize = () => adjustHeight()
-    window.addEventListener("resize", handleResize)
+    const handleResize = () => adjustHeight();
+    window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [adjustHeight])
+  }, [adjustHeight]);
 
-  return { textareaRef, adjustHeight }
+  return { textareaRef, adjustHeight };
 }
 
 const MIN_HEIGHT = 48
@@ -58,14 +62,14 @@ const AnimatedPlaceholder = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -5 }}
       transition={{ duration: 0.1 }}
-      className="pointer-events-none w-[150px] text-sm absolute text-black/70 dark:text-white/70">
-      {showSearch ? "Search the web..." : "Ask Skiper Ai..."}
+      className="pointer-events-none w-[150px] text-sm absolute text-white/70 dark:text-white/70">
+      {showSearch ? "Search the web..." : "Ask Nebula AI..."}
     </motion.p>
   </AnimatePresence>
 )
 
-export default function AiInput({ value, setValue, handleKeyPress }) {
-  // const [setValue] = useState("")
+export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
+  // const [value, setValue] = useState("");
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: MIN_HEIGHT,
     maxHeight: MAX_HEIGHT,
@@ -74,38 +78,81 @@ export default function AiInput({ value, setValue, handleKeyPress }) {
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handelClose = (e) => {
+  const handleClosePreview = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset file input
+      fileInputRef.current.value = ""; // Clear the file input
     }
-    setImagePreview(null); // Use null instead of empty string
+    setImagePreview(null);
   };
 
-  const handelChange = (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file) {
-      setImagePreview(URL.createObjectURL(file));
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    } else {
+      setImagePreview(null);
     }
   };
-
+  // Handle form submission
   const handleSubmit = (e) => {
-    setValue("");
+    e.preventDefault();
+    if ((value.trim() || imagePreview) && onSend) {
+      onSend();
+    }
+    // Clear image preview on submit
+    if (imagePreview) {
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+    // Reset textarea height after sending
     adjustHeight(true);
   };
+ useEffect(() => {
+   return () => {
+     if (imagePreview) {
+       URL.revokeObjectURL(imagePreview);
+     }
+   };
+ }, [imagePreview]);
 
   useEffect(() => {
-    return () => {
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
-      }
-    };
-  }, [imagePreview]);
+    adjustHeight();
+  }, [value, adjustHeight]);
+
   return (
-    <div className="w-full py-4">
-      <div className="relative max-w-xl border rounded-[22px] border-black/5 p-1 w-full mx-auto">
-        <div className="relative rounded-2xl bg-gray-800 border border-gray-700  shadow-sm focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200 text-white">
+    <form onSubmit={handleSubmit} className="">
+      <div className="w-full rounded-2xl border border-[#4a4a4a] shadow-lg overflow-hidden flex flex-col  transition-all duration-200 my-4 mx-2">
+        {/* <div className="relative max-w-xl border rounded-[22px] border-black/5 p-1 w-full mx-auto"> */}
+
+        <div className="relative rounded-2xl border border-black/5 bg-[#2f2f2f] flex flex-col">
+          <AnimatePresence>
+            {imagePreview && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="p-3 border-b border-[#4a4a4a] overflow-hidden"
+              >
+                <div className="relative inline-block align-top">
+                  <img
+                    src={imagePreview}
+                    alt="Attachment preview"
+                    className="object-cover w-20 h-20 rounded-lg"
+                  />
+                  <button
+                    onClick={handleClosePreview}
+                    aria-label="Remove attachment"
+                    className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div
             className="overflow-y-auto"
             style={{ maxHeight: `${MAX_HEIGHT}px` }}
@@ -118,10 +165,9 @@ export default function AiInput({ value, setValue, handleKeyPress }) {
                 className="w-full rounded-2xl rounded-b-none px-4 py-3 bg-black/5 dark:bg-white/5 border-none dark:text-white resize-none focus-visible:ring-0 leading-[1.2]"
                 ref={textareaRef}
                 onKeyDown={handleKeyPress}
-                onChange={(e) => {
-                  setValue(e.target.value);
-                  adjustHeight();
-                }}
+                onChange={(e) => setValue(e.target.value)}
+                style={{ height: `${MIN_HEIGHT}px` }}
+                rows={1}
               />
               {!value && (
                 <div className="absolute left-4 top-3">
@@ -135,41 +181,20 @@ export default function AiInput({ value, setValue, handleKeyPress }) {
             <div className="absolute left-3 bottom-3 flex items-center gap-2">
               <label
                 className={cn(
-                  "cursor-pointer relative rounded-full p-2 bg-black/5 dark:bg-white/5",
+                  "cursor-pointer rounded-full p-2 transition-all duration-200 hover:bg-[#3a3a3a] flex-shrink-0 w-9 h-9 flex items-center justify-center",
                   imagePreview
-                    ? "bg-[#ff3f17]/15 border border-[#ff3f17] text-[#ff3f17]"
-                    : "bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
+                    ? "text-orange-400"
+                    : "text-gray-400 hover:text-white"
                 )}
               >
                 <input
                   type="file"
                   ref={fileInputRef}
-                  onChange={handelChange}
+                  onChange={handleFileChange}
                   className="hidden"
+                  accept="image/*"
                 />
-                <Paperclip
-                  className={cn(
-                    "w-4 h-4 text-white dark:text-white/40 hover:text-white dark:hover:text-white transition-colors",
-                    imagePreview && "text-[#ff3f17]"
-                  )}
-                />
-                {imagePreview && (
-                  <div className="absolute w-[100px] h-[100px] top-14 -left-4">
-                    <Image
-                      className="object-cover rounded-2xl"
-                      src={imagePreview || "/picture1.jpeg"}
-                      height={500}
-                      width={500}
-                      alt="additional image"
-                    />
-                    <button
-                      onClick={handelClose}
-                      className="bg-[#e8e8e8] text-[#464646] absolute -top-1 -left-1 shadow-3xl rounded-full rotate-45"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+                <Paperclip className="w-5 h-5" />
               </label>
               <button
                 type="button"
@@ -232,21 +257,22 @@ export default function AiInput({ value, setValue, handleKeyPress }) {
             </div>
             <div className="absolute right-3 bottom-3">
               <button
-                type="button"
-                onClick={handleSubmit}
+                type="submit"
+                disabled={!value.trim() && !imagePreview}
                 className={cn(
-                  "rounded-full p-2 transition-colors !bg-gray-600 bg-opacity-90",
-                  value
-                    ? "bg-[#ff3f17]/15 text-[#ff3f17]"
-                    : "bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
+                  "w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 flex-shrink-0",
+                  value.trim() || imagePreview
+                    ? "bg-white text-black hover:bg-gray-200"
+                    : "bg-[#3a3a3a] text-gray-500 cursor-not-allowed"
                 )}
               >
-                <Send className="w-4 h-4 text-white cursor-pointer" />
+                <Send className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
+        {/* </div> */}
       </div>
-    </div>
+    </form>
   );
 }

@@ -1,4 +1,4 @@
-const { GoogleGenAI } = require("@google/genai");
+const { GoogleGenAI, Modality } = require("@google/genai");
 
 const ai = new GoogleGenAI({});
 
@@ -123,6 +123,21 @@ const generateVector = async (content) => {
 
   return response.embeddings[0].values;
 };
+
+// const generateImage = async () => {
+//   const response = await ai.models.generateContent({
+//     model: "imagen-3.0-generate-002",
+//     contents: ["Create a 3D rendered planet with rings"],
+//     config: {
+//       responseModalities: ["TEXT", "IMAGE"],
+//     },
+//   });
+
+//   console.log(response.text);
+//   console.log(response.inlineDataParts[0].data); // image bytes
+// };
+
+// generateImage()
 
 module.exports = {
   generateResponse,

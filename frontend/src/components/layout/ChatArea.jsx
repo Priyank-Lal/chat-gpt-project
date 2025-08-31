@@ -11,50 +11,66 @@ import {
 } from "lucide-react";
 import AiInput from "../ui/ai-input";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils"; // Assuming you have this utility
+import { cn } from "@/lib/utils";
 
-// A simple and clean component for the bot's avatar
+// Bot avatar component
 const BotAvatar = () => (
-  <div className="w-9 h-9 flex-shrink-0 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center shadow-md">
-    <Bot size={20} className="text-indigo-300" />
+  <div className="w-8 h-8 flex-shrink-0 bg-[#10a37f] rounded-full flex items-center justify-center shadow-sm">
+    <span className="text-white font-bold text-sm">G</span>
   </div>
 );
 
-// A simple and clean component for the user's avatar
+// User avatar component
 const UserAvatar = ({ user }) => (
-  <div className="w-9 h-9 flex-shrink-0 bg-gray-700 rounded-full flex items-center justify-center shadow-sm  ">
-    <User size={18} className="text-gray-300" />
+  <div className="w-8 h-8 flex-shrink-0 bg-[#ab68ff] rounded-full flex items-center justify-center shadow-sm">
+    <User size={16} className="text-white" />
   </div>
 );
 
-// The welcoming UI when there are no messages
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center h-full text-center p-4">
+// Empty state component
+const EmptyState = ({ onNewChat }) => (
+  <div className="flex flex-col items-center justify-center h-full text-center p-8 max-w-2xl mx-auto">
     <motion.div
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="p-8 bg-slate-800/50 rounded-full mb-6"
+      className="mb-8"
     >
-      <Bot size={48} className="text-indigo-300" />
+      <div className="w-16 h-16 bg-[#2a2a2a] rounded-full flex items-center justify-center mb-6">
+        <Bot size={32} className="text-white" />
+      </div>
     </motion.div>
     <motion.h2
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-      className="text-2xl font-bold text-slate-200"
+      className="text-2xl font-normal text-white mb-4"
     >
       How can I help you today?
     </motion.h2>
-    <motion.p
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-      className="text-slate-400 mt-2 max-w-sm"
+      className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-lg"
     >
-      Feel free to ask me anything, from general knowledge questions to
-      summarizing articles or even helping you write code.
-    </motion.p>
+      {[
+        "Create a workout plan",
+        "Write a Python script",
+        "Plan a trip to Japan",
+        "Explain quantum computing",
+      ].map((suggestion, index) => (
+        <motion.button
+          key={index}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="p-4 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-xl text-sm text-white border border-[#3a3a3a] hover:border-[#4a4a4a] transition-all duration-200 text-left"
+          onClick={() => onNewChat && onNewChat()}
+        >
+          {suggestion}
+        </motion.button>
+      ))}
+    </motion.div>
   </div>
 );
 
@@ -65,6 +81,7 @@ const ChatArea = ({
   onToggleSidebar = () => {},
   className = "",
   chatID,
+  handleNewChat,
 }) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -91,29 +108,28 @@ const ChatArea = ({
   return (
     <div
       className={cn(
-        "flex-1 flex flex-col bg-slate-900 text-gray-200 overflow-hidden justify-center items-center",
+        "flex-1 flex flex-col bg-[#1a1a1a] text-white overflow-hidden",
+        className
       )}
     >
       {/* Header for mobile */}
-      <div className="lg:hidden bg-slate-900/70 backdrop-blur-md border-b border-slate-700/50 p-3 flex items-center gap-3 sticky top-0 z-10">
+      <div className="lg:hidden bg-[#1a1a1a] border-b border-[#3a3a3a] p-4 flex items-center gap-3 sticky top-0 z-10">
         <button
-          className="p-2 hover:bg-slate-800 rounded-md transition-colors"
+          className="p-2 hover:bg-[#2a2a2a] rounded-lg transition-all duration-200"
           onClick={onToggleSidebar}
         >
           <Menu size={20} />
         </button>
-        <h1 className="text-lg font-semibold text-slate-200 truncate">
-          AI Assistant
-        </h1>
+        <h1 className="text-lg font-semibold text-white truncate">ChatGPT</h1>
       </div>
 
       {/* Messages container */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 sm:p-6 ">
-          <div className="max-w-3xl mx-auto space-y-6">
-            {displayMessages.length === 0 && !isTyping ? (
-              <EmptyState />
-            ) : (
+        <div className="max-w-4xl mx-auto">
+          {displayMessages.length === 0 && !isTyping ? (
+            <EmptyState onNewChat={handleNewChat} />
+          ) : (
+            <div className="space-y-6 p-4">
               <AnimatePresence>
                 {displayMessages.map((message) => (
                   <motion.div
@@ -123,81 +139,91 @@ const ChatArea = ({
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     layout
-                    className={cn(
-                      "flex gap-4 items-start",
-                      message.role === "user" ? "justify-end" : "justify-start"
-                    )}
+                    className="group"
                   >
-                    {/* Bot Avatar */}
-                    {message.role === "model" && <BotAvatar />}
-
-                    {/* Message Content */}
-                    <div
-                      className={cn(
-                        "max-w-[75%] px-4 py-3 text-sm",
-                        message.role === "user" ? "self-end" : "self-start",
-                        message.role === "user"
-                          ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-2xl rounded-br-none shadow-lg"
-                          : "text-slate-200 leading-relaxed whitespace-pre-wrap max-w-3xl"
-                      )}
-                    >
-                      <div className="prose prose-invert max-w-none prose-p:my-0 prose-pre:my-2">
-                        {message.content}
-                      </div>
-                      {message.role === "model" && (
-                        <div className="flex items-center gap-1 mt-3 -mb-1 opacity-70 hover:opacity-100 transition-opacity">
-                          <button className="p-1.5 hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-200 transition-colors">
-                            <ThumbsUp size={14} />
-                          </button>
-                          <button className="p-1.5 hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-200 transition-colors">
-                            <ThumbsDown size={14} />
-                          </button>
-                          <button className="p-1.5 hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-200 transition-colors">
-                            <RotateCcw size={14} />
-                          </button>
-                          <button className="p-1.5 hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-200 transition-colors">
-                            <Copy size={14} />
-                          </button>
-                          <button className="p-1.5 hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-200 transition-colors">
-                            <MoreHorizontal size={14} />
-                          </button>
+                    {message.role === "user" ? (
+                      // User message with bubble
+                      <div className="flex justify-end mb-4">
+                        <div className="flex items-start gap-3 max-w-[80%]">
+                          <div className="bg-[#2f2f2f] text-white px-4 py-3 rounded-2xl rounded-br-md shadow-sm">
+                            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                              {message.content}
+                            </div>
+                          </div>
+                          <UserAvatar />
                         </div>
-                      )}
-                    </div>
-                    {/* User Avatar */}
-                    {message.role === "user" && <UserAvatar />}
+                      </div>
+                    ) : (
+                      // AI message with flat design
+                      <div className="flex items-start gap-3 mb-6">
+                        <BotAvatar />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
+                            {message.content}
+                          </div>
+                          {/* Action buttons */}
+                          <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
+                              <Copy size={14} />
+                            </button>
+                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
+                              <ThumbsUp size={14} />
+                            </button>
+                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
+                              <ThumbsDown size={14} />
+                            </button>
+                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
+                              <RotateCcw size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </AnimatePresence>
-            )}
 
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex items-start gap-3 self-start">
-                <BotAvatar />
-                <p className="text-slate-400 italic">Thinking...</p>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+              {/* Typing Indicator */}
+              {isTyping && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-3"
+                >
+                  <BotAvatar />
+                  <div className="flex items-center space-x-2 py-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
         </div>
       </div>
 
-      {chatID ? (
-        <>
-          <div className="w-full bg-slate-900 border-t border-slate-700/50 pt-2 max-w-3xl mx-auto">
+      {/* Input area */}
+      {chatID && (
+        <div className="">
+          <div className="max-w-4xl mx-auto">
             <AiInput
               value={inputMessage}
               setValue={setInputMessage}
               handleKeyPress={handleKeyPress}
+              onSend={handleSendMessage}
             />
-            <p className="text-xs text-center text-slate-500 pb-2 px-4">
-              AI can make mistakes. Consider checking important information.
-            </p>
           </div>
-        </>
-      ) : (
-        <></>
+        </div>
       )}
     </div>
   );

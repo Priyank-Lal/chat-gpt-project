@@ -8,13 +8,13 @@ import {
   User,
   Trash2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button"; // Assuming shadcn components are here
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils"; // Assuming a utility for class names
+import { cn } from "@/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { getMessages } from "../../store/actions/chatActions";
-import { Skeleton } from "@/components/ui/skeleton"; // Added import
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Framer Motion Variants for animations
 const sidebarVariants = {
@@ -63,7 +63,6 @@ const Sidebar = ({
   onNewChat,
   className,
 }) => {
-  // Restored Redux hooks for real data
   const user = useSelector((state) => state.user.user);
   const chats = useSelector((state) => state.chat.chats);
   const isLoading = useSelector((state) => state.chat.loading);
@@ -73,7 +72,6 @@ const Sidebar = ({
 
   const handleChatSelect = (selectedChatId) => {
     onchatselect(selectedChatId);
-    // Restored dispatch call to fetch messages
     dispatch(getMessages(selectedChatId));
 
     // Close sidebar on mobile after selection
@@ -103,26 +101,28 @@ const Sidebar = ({
         initial="closed"
         animate={isOpen ? "open" : "closed"}
         className={cn(
-          "fixed lg:relative top-0 left-0 h-full w-full max-w-[250px] bg-gray-900/95 backdrop-blur-lg border-r border-gray-700/50 flex flex-col z-50 text-gray-200",
+          "fixed lg:relative top-0 left-0 h-full w-full max-w-[280px] bg-[#1a1a1a] border-r border-[#3a3a3a] flex flex-col z-50 text-white shadow-2xl",
           className
         )}
       >
         {/* Header */}
-        <div className="flex-shrink-0 p-4 border-b border-gray-700/50">
+        <div className="flex-shrink-0 p-4 border-b border-[#3a3a3a]">
           <div className="flex items-center justify-between mb-4">
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-xl font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400"
+              className="flex items-center space-x-2"
             >
-              CHAT A.I+
+              <span className="text-lg font-semibold tracking-tight text-white">
+                ChatGPT
+              </span>
             </motion.h1>
             <Button
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="lg:hidden text-gray-400 hover:bg-gray-800 hover:text-white"
+              className="lg:hidden text-gray-400 hover:bg-[#2a2a2a] hover:text-white rounded-lg transition-all duration-200"
             >
               <X size={20} />
             </Button>
@@ -134,25 +134,22 @@ const Sidebar = ({
           >
             <Button
               onClick={onNewChat}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all duration-300 transform hover:scale-105"
+              className="w-full bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white font-medium transition-all duration-200 rounded-lg h-10 border border-[#3a3a3a] hover:border-[#4a4a4a]"
             >
-              <Plus size={18} className="mr-2" />
-              New Chat
+              <Plus size={16} className="mr-2" />
+              New chat
             </Button>
           </motion.div>
         </div>
 
         {/* Chat History */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4 flex-shrink-0">
-            <h3 className="text-sm text-gray-400 font-medium">Your Chats</h3>
-          </div>
-          <ScrollArea className="flex-1 px-4">
-            <motion.ul variants={listVariants} className="space-y-2">
+          <ScrollArea className="flex-1 px-3">
+            <motion.ul variants={listVariants} className="space-y-1 py-2">
               <AnimatePresence>
                 {isLoading ? (
-                  <div className="flex justify-center items-center h-full">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500 border-solid"></div>
+                  <div className="flex justify-center items-center h-32">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-600 border-t-white"></div>
                   </div>
                 ) : (
                   <>
@@ -162,22 +159,29 @@ const Sidebar = ({
                         variants={itemVariants}
                         exit={{ opacity: 0, x: -20 }}
                         layout
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                       >
                         <Button
                           variant="ghost"
                           onClick={() => handleChatSelect(chat._id)}
                           className={cn(
-                            "w-full justify-start p-3 h-auto text-left rounded-lg transition-colors duration-200",
+                            "w-full justify-start p-3 h-auto text-left rounded-lg transition-all duration-200 group",
                             chat._id === chatID
-                              ? "bg-indigo-500/20 text-white"
-                              : "text-gray-400 hover:bg-gray-800/60 hover:text-gray-200"
+                              ? "bg-[#2a2a2a] text-white"
+                              : "text-gray-300 hover:bg-[#2a2a2a] hover:text-white"
                           )}
                         >
                           <MessageSquareText
                             size={16}
-                            className="flex-shrink-0 mr-3"
+                            className={cn(
+                              "flex-shrink-0 mr-3 transition-colors duration-200",
+                              chat._id === chatID
+                                ? "text-white"
+                                : "text-gray-500 group-hover:text-gray-300"
+                            )}
                           />
-                          <span className="truncate flex-1 text-sm font-medium">
+                          <span className="truncate flex-1 text-sm font-normal">
                             {chat.title || "New Conversation"}
                           </span>
                         </Button>
@@ -185,12 +189,9 @@ const Sidebar = ({
                     ))}
                     {isCreating && (
                       <motion.li layout>
-                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-800/50">
-                          <Skeleton className="h-6 w-6 rounded-full bg-gray-700" />
-                          <div className="flex flex-col space-y-1">
-                            <Skeleton className="h-4 w-24 rounded bg-gray-700" />
-                            <Skeleton className="h-3 w-16 rounded bg-gray-700" />
-                          </div>
+                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-[#2a2a2a]">
+                          <Skeleton className="h-4 w-4 rounded bg-[#3a3a3a]" />
+                          <Skeleton className="h-4 w-32 rounded bg-[#3a3a3a]" />
                         </div>
                       </motion.li>
                     )}
@@ -202,29 +203,29 @@ const Sidebar = ({
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 p-4 border-t border-gray-700/50 space-y-2">
+        <div className="flex-shrink-0 p-3 border-t border-[#3a3a3a] space-y-1">
           <Button
             variant="ghost"
-            className="w-full justify-start text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+            className="w-full justify-start text-gray-400 hover:bg-[#2a2a2a] hover:text-white rounded-lg h-10 transition-all duration-200"
           >
             <Trash2 size={16} className="mr-3" /> Clear conversations
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+            className="w-full justify-start text-gray-400 hover:bg-[#2a2a2a] hover:text-white rounded-lg h-10 transition-all duration-200"
           >
             <Settings size={16} className="mr-3" /> Settings
           </Button>
-          <div className="p-2 rounded-lg hover:bg-gray-800/60 transition-colors cursor-pointer flex items-center gap-3">
+          <div className="p-3 rounded-lg hover:bg-[#2a2a2a] transition-all duration-200 cursor-pointer flex items-center gap-3">
             <Avatar className="w-8 h-8">
               <AvatarImage
                 src={user?.avatarUrl || "https://github.com/shadcn.png"}
               />
-              <AvatarFallback className="bg-indigo-600 text-white">
-                <User size={16} />
+              <AvatarFallback className="bg-[#3a3a3a] text-white font-semibold text-sm">
+                <User size={14} />
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium text-gray-200 truncate">
+            <span className="text-sm font-normal text-white truncate">
               {user?.fullName
                 ? `${user.fullName.firstName} ${user.fullName.lastName}`
                 : "Guest User"}
