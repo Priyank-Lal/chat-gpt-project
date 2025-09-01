@@ -8,14 +8,28 @@ import {
   Menu,
   User,
   Bot,
+  Check,
 } from "lucide-react";
 import AiInput from "../ui/ai-input";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, isObject } from "framer-motion";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faThumbsUp as farThumbsUp,
+  faThumbsDown as farThumbsDown,
+  faCopy,
+} from "@fortawesome/free-regular-svg-icons";
+
+import {
+  faCheck,
+  faArrowsRotate,
+  faThumbsUp,
+  faThumbsDown,
+} from "@fortawesome/free-solid-svg-icons";
 
 // Bot avatar component
 const BotAvatar = () => (
@@ -94,6 +108,8 @@ const ChatArea = ({
 }) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
+  const [isCopyIcon, setIsCopyIcon] = useState(true);
+  const [reactions, setReactions] = useState({});
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -171,7 +187,12 @@ const ChatArea = ({
                     ) : (
                       // AI message with flat design
                       <div className="flex items-start gap-3 mb-6">
-                        <BotAvatar />
+                        {/* <BotAvatar /> */}
+                        <img
+                          src="../../../icons8-ai.svg"
+                          className="w-6 h-6"
+                          alt=""
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
                             {message.file ? (
@@ -245,7 +266,7 @@ const ChatArea = ({
                           {/* Action buttons */}
                           <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <button
-                              className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+                              className="p-1 px-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
                               onClick={() => {
                                 if (message.file) {
                                   navigator.clipboard.writeText(
@@ -256,37 +277,79 @@ const ChatArea = ({
                                     message.content
                                   );
                                 }
-                                console.log(
-                                  "Copied message content to clipboard"
-                                );
+                                setIsCopyIcon(false);
+                                setTimeout(() => {
+                                  setIsCopyIcon(true);
+                                }, 4000);
                               }}
                             >
-                              <Copy size={14} />
+                              {isCopyIcon ? (
+                                <FontAwesomeIcon
+                                  icon={faCopy}
+                                  className="text-gray-400"
+                                  size="sm"
+                                />
+                              ) : (
+                                // <Check size={14} />
+                                <FontAwesomeIcon
+                                  icon={faCheck}
+                                  className="text-gray-400"
+                                  size="sm"
+                                />
+                              )}
                             </button>
                             <button
-                              className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+                              className="p-1 px-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
                               onClick={() => {
-                                console.log(
-                                  "Thumbs up for message",
-                                  message._id
-                                );
+                                setReactions((prev) => {
+                                  // If thumbs up is active, clear it; else set to up and clear down if present
+                                  if (prev[message._id] === "up") {
+                                    return { ...prev, [message._id]: null };
+                                  } else {
+                                    return { ...prev, [message._id]: "up" };
+                                  }
+                                });
                               }}
                             >
-                              <ThumbsUp size={14} />
+                              <FontAwesomeIcon
+                                icon={
+                                  reactions[message._id] === "up"
+                                    ? faThumbsUp
+                                    : farThumbsUp
+                                }
+                                className="text-gray-400"
+                                size="sm"
+                              />
                             </button>
+
                             <button
-                              className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+                              className="p-1 px-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
                               onClick={() => {
-                                console.log(
-                                  "Thumbs down for message",
-                                  message._id
-                                );
+                                setReactions((prev) => {
+                                  // If thumbs down is active, clear it; else set to down and clear up if present
+                                  if (prev[message._id] === "down") {
+                                    return { ...prev, [message._id]: null };
+                                  } else {
+                                    return { ...prev, [message._id]: "down" };
+                                  }
+                                });
                               }}
                             >
-                              <ThumbsDown size={14} />
+                              <FontAwesomeIcon
+                                icon={
+                                  reactions[message._id] === "down"
+                                    ? faThumbsDown
+                                    : farThumbsDown
+                                }
+                                className="text-gray-400"
+                                size="sm"
+                              />
                             </button>
-                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
-                              <RotateCcw size={14} />
+                            <button className="p-1 px-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400  transition-all duration-200">
+                              <FontAwesomeIcon
+                                icon={faArrowsRotate}
+                                size="xs"
+                              />
                             </button>
                           </div>
                         </div>
@@ -303,7 +366,12 @@ const ChatArea = ({
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-start gap-3"
                 >
-                  <BotAvatar />
+                  <img
+                    src="../../../icons8-ai.svg"
+                    className="w-6 h-6"
+                    alt=""
+                  />
+
                   <div className="flex items-center space-x-2 py-3">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -326,7 +394,12 @@ const ChatArea = ({
                   animate={{ opacity: 1 }}
                   className="flex items-start gap-3"
                 >
-                  <BotAvatar />
+                  <img
+                    src="../../../icons8-ai.svg"
+                    className="w-6 h-6"
+                    alt=""
+                  />
+
                   <div className="h-110 w-110 rounded-lg bg-[#2a2a2a] animate-pulse border border-[#3a3a3a]" />
                 </motion.div>
               )}
@@ -337,7 +410,12 @@ const ChatArea = ({
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-start gap-3"
                 >
-                  <BotAvatar />
+                  <img
+                    src="../../../icons8-ai.svg"
+                    className="w-6 h-6"
+                    alt=""
+                  />
+
                   <div className="flex items-center space-x-2 py-3">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>

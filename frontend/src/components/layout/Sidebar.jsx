@@ -126,14 +126,14 @@ const Sidebar = ({
       >
         {/* Header */}
         <div className="flex-shrink-0 p-4 border-b border-[#3a3a3a]">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 w-full ">
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 w-full"
             >
-              <span className="text-lg font-semibold tracking-tight text-white">
+              <span className="text-lg  font-semibold tracking-tight text-white">
                 Nebula AI
               </span>
             </motion.h1>
