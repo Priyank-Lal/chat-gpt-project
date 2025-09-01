@@ -35,6 +35,8 @@ function initSocketServer(httpServer) {
 
   io.on("connection", (socket) => {
     socket.on("ai-message", async (messagePayload) => {
+      socket.emit("ai-response-start");
+
       const [messageFromUser, userVectors] = await Promise.all([
         messageModel.create({
           userID: socket.user._id,
@@ -131,6 +133,7 @@ function initSocketServer(httpServer) {
     });
 
     socket.on("ai-image", async (payload) => {
+      socket.emit("ai-image-start");
       try {
         const messageFromUser = await messageModel.create({
           userID: socket.user._id,
@@ -149,12 +152,15 @@ function initSocketServer(httpServer) {
         const responseToUser = await messageModel.create({
           userID: socket.user._id,
           chatID: payload.chatID,
-          content: imageUrl, // store URL as message content
+          content: imageUrl,
           role: "model",
         });
 
         socket.emit("ai-image-response", {
-          responseToUser,
+          responseToUser: {
+            ...responseToUser.toObject(),
+            image: true,
+          },
         });
       } catch (err) {
         console.error("❌ Error in ai-image:", err.message);

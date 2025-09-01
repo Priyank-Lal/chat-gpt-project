@@ -1,15 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { Globe, Paperclip, Plus, Send,X } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Globe, Paperclip, Plus, Send, X } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
-function useAutoResizeTextarea({
-  minHeight,
-  maxHeight
-}) {
-  const textareaRef = useRef(null)
+function useAutoResizeTextarea({ minHeight, maxHeight }) {
+  const textareaRef = useRef(null);
   const adjustHeight = useCallback(
     (reset = false) => {
       const textarea = textareaRef.current;
@@ -49,32 +46,37 @@ function useAutoResizeTextarea({
   return { textareaRef, adjustHeight };
 }
 
-const MIN_HEIGHT = 48
-const MAX_HEIGHT = 164
+const MIN_HEIGHT = 48;
+const MAX_HEIGHT = 164;
 
-const AnimatedPlaceholder = ({
-  showSearch
-}) => (
+const AnimatedPlaceholder = ({ imageGen }) => (
   <AnimatePresence mode="wait">
     <motion.p
-      key={showSearch ? "search" : "ask"}
+      key={imageGen ? "search" : "ask"}
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -5 }}
       transition={{ duration: 0.1 }}
-      className="pointer-events-none w-[150px] text-sm absolute text-white/70 dark:text-white/70">
-      {showSearch ? "Search the web..." : "Ask Nebula AI..."}
+      className="pointer-events-none w-[150px] text-sm absolute text-white/70 dark:text-white/70"
+    >
+      {imageGen ? "Generate Images..." : "Ask Nebula AI..."}
     </motion.p>
   </AnimatePresence>
-)
+);
 
-export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
+export default function AiInput({
+  value,
+  setValue,
+  handleKeyPress,
+  onSend,
+  imageGen,
+  setImageGen
+}) {
   // const [value, setValue] = useState("");
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: MIN_HEIGHT,
     maxHeight: MAX_HEIGHT,
   });
-  const [showSearch, setShowSearch] = useState(true);
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -99,24 +101,23 @@ export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if ((value.trim() || imagePreview) && onSend) {
-      onSend();
+    if (value.trim() || imagePreview) {
+      onSend()
     }
-    // Clear image preview on submit
+
     if (imagePreview) {
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
-    // Reset textarea height after sending
     adjustHeight(true);
   };
- useEffect(() => {
-   return () => {
-     if (imagePreview) {
-       URL.revokeObjectURL(imagePreview);
-     }
-   };
- }, [imagePreview]);
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   useEffect(() => {
     adjustHeight();
@@ -171,7 +172,7 @@ export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
               />
               {!value && (
                 <div className="absolute left-4 top-3">
-                  <AnimatedPlaceholder showSearch={showSearch} />
+                  <AnimatedPlaceholder imageGen={imageGen} />
                 </div>
               )}
             </div>
@@ -199,11 +200,11 @@ export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
               <button
                 type="button"
                 onClick={() => {
-                  setShowSearch(!showSearch);
+                  setImageGen(!imageGen);
                 }}
                 className={cn(
                   "rounded-full transition-all flex items-center gap-2 px-1.5 py-1 border h-8",
-                  showSearch
+                  imageGen
                     ? "bg-[#ff3f17]/15 border-[#ff3f17] text-[#ff3f17]"
                     : "bg-black/5 dark:bg-white/5 border-transparent text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
                 )}
@@ -211,11 +212,11 @@ export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
                 <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
                   <motion.div
                     animate={{
-                      rotate: showSearch ? 180 : 0,
-                      scale: showSearch ? 1.1 : 1,
+                      rotate: imageGen ? 180 : 0,
+                      scale: imageGen ? 1.1 : 1,
                     }}
                     whileHover={{
-                      rotate: showSearch ? 180 : 15,
+                      rotate: imageGen ? 180 : 15,
                       scale: 1.1,
                       transition: {
                         type: "spring",
@@ -232,13 +233,13 @@ export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
                     <Globe
                       className={cn(
                         "w-4 h-4",
-                        showSearch ? "text-[#ff3f17]" : "text-inherit"
+                        imageGen ? "text-[#ff3f17]" : "text-inherit"
                       )}
                     />
                   </motion.div>
                 </div>
                 <AnimatePresence>
-                  {showSearch && (
+                  {imageGen && (
                     <motion.span
                       initial={{ width: 0, opacity: 0 }}
                       animate={{
@@ -249,7 +250,7 @@ export default function AiInput({ value, setValue, handleKeyPress, onSend }) {
                       transition={{ duration: 0.2 }}
                       className="text-sm overflow-hidden whitespace-nowrap text-[#ff3f17] flex-shrink-0"
                     >
-                      Search
+                      Generate Image
                     </motion.span>
                   )}
                 </AnimatePresence>

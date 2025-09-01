@@ -82,7 +82,11 @@ const ChatArea = ({
   className = "",
   chatID,
   handleNewChat,
-  handleImageGeneration= ()=>{},
+  handleImageGeneration = () => {},
+  imageGen,
+  setImageGen,
+  loadingMessage,
+  loadingImage,
 }) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -93,7 +97,11 @@ const ChatArea = ({
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
-    await onSendMessage(inputMessage);
+    if (imageGen) {
+      handleImageGeneration(inputMessage);
+    } else {
+      await onSendMessage(inputMessage);
+    }
     setInputMessage("");
   };
 
@@ -105,6 +113,7 @@ const ChatArea = ({
   };
 
   const displayMessages = messages?.length ? messages : [];
+
 
   return (
     <div
@@ -147,7 +156,7 @@ const ChatArea = ({
                       <div className="flex justify-end mb-4">
                         <div className="flex items-start gap-3 max-w-[80%]">
                           <div className="bg-[#2f2f2f] text-white px-4 py-3 rounded-2xl rounded-br-md shadow-sm">
-                            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                            <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
                               {message.content}
                             </div>
                           </div>
@@ -160,7 +169,15 @@ const ChatArea = ({
                         <BotAvatar />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
-                            {message.content}
+                            {message.image ? (
+                              <img
+                                src={message.content}
+                                alt="AI Generated"
+                                className="rounded-lg max-w-xs md:max-w-sm lg:max-w-md border border-[#3a3a3a] shadow"
+                              />
+                            ) : (
+                              <>{message.content}</>
+                            )}
                           </div>
                           {/* Action buttons */}
                           <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -183,6 +200,42 @@ const ChatArea = ({
                   </motion.div>
                 ))}
               </AnimatePresence>
+
+              {/* Show typing dots loader */}
+              {(isTyping || loadingMessage) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-3"
+                >
+                  <BotAvatar />
+                  <div className="flex items-center space-x-2 py-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Show skeleton for image loader */}
+              {loadingImage && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-start gap-3"
+                >
+                  <BotAvatar />
+                  <div className="rounded-lg w-48 h-48 bg-[#2a2a2a] animate-pulse border border-[#3a3a3a]" />
+                </motion.div>
+              )}
 
               {/* Typing Indicator */}
               {isTyping && (
@@ -221,7 +274,9 @@ const ChatArea = ({
               value={inputMessage}
               setValue={setInputMessage}
               handleKeyPress={handleKeyPress}
-              onSend={handleImageGeneration}
+              onSend={handleSendMessage}
+              imageGen={imageGen}
+              setImageGen={setImageGen}
             />
           </div>
         </div>

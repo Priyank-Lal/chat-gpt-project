@@ -12,11 +12,14 @@ import NavBar from "../components/layout/NavBar";
 const Home = () => {
   const chats = useSelector((state) => state.chat.chats);
   const [socket, setSocket] = useState(null);
+  const [imageGen, setImageGen] = useState(false);
   const dispatch = useDispatch();
 
   const [chatID, setChatID] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState(false);
+  const [loadingImage, setLoadingImage] = useState(false);
 
   const messages = useSelector((state) => state.chat.messages[chatID]);
 
@@ -30,7 +33,12 @@ const Home = () => {
       withCredentials: true,
     });
 
+    tempSocket.on("ai-response-start", () => {
+      setLoadingMessage(true);
+    });
+
     tempSocket.on("ai-response", ({ responseToUser }) => {
+      setLoadingMessage(false);
       dispatch(
         appendMessage({
           chatID: responseToUser.chatID,
@@ -38,6 +46,7 @@ const Home = () => {
         })
       );
     });
+
     tempSocket.on("user-message", ({ messageFromUser, tempID }) => {
       dispatch(
         replaceMessage({
@@ -48,9 +57,18 @@ const Home = () => {
       );
     });
 
+    tempSocket.on("ai-image-start", () => {
+      setLoadingImage(true);
+    });
+
     tempSocket.on("ai-image-response", ({ responseToUser }) => {
-      console.log(responseToUser);
-      
+      setLoadingImage(false);
+      dispatch(
+        appendMessage({
+          chatID: responseToUser.chatID,
+          message: { ...responseToUser, image: true },
+        })
+      );
     });
     setSocket(tempSocket);
 
@@ -73,12 +91,11 @@ const Home = () => {
 
   const handleImageGeneration = async (content) => {
     console.log("Running");
-    
+
     socket.emit("ai-image", {
       chatID,
-      prompt: "An image of an Astronaut",
+      prompt: content,
     });
-
   };
 
   const handlechatselect = (id) => {
@@ -114,8 +131,6 @@ const Home = () => {
     handlechatselect(response.chatID);
   };
 
-
-
   return (
     <>
       <div className="flex h-screen bg-[#1a1a1a] overflow-hidden">
@@ -140,6 +155,10 @@ const Home = () => {
           chats={chats}
           handleNewChat={handleNewChat}
           handleImageGeneration={handleImageGeneration}
+          imageGen={imageGen}
+          setImageGen={setImageGen}
+          loadingMessage={loadingMessage}
+          loadingImage={loadingImage}
         />
       </div>
     </>
