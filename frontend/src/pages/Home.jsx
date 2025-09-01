@@ -13,6 +13,7 @@ const Home = () => {
   const chats = useSelector((state) => state.chat.chats);
   const [socket, setSocket] = useState(null);
   const [imageGen, setImageGen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const dispatch = useDispatch();
 
   const [chatID, setChatID] = useState(null);
@@ -66,7 +67,7 @@ const Home = () => {
       dispatch(
         appendMessage({
           chatID: responseToUser.chatID,
-          message: responseToUser
+          message: responseToUser,
         })
       );
     });
@@ -80,14 +81,25 @@ const Home = () => {
 
     const tempMessage = {
       _id: tempID,
-      clientKey: tempID, // stable key to prevent re-mount animation
+      clientKey: tempID,
       chatID,
+      file: selectedFile ? true : false,
+      fileType: selectedFile ? selectedFile.fileType : null,
       content,
       role: "user",
     };
     dispatch(appendMessage({ chatID, message: tempMessage }));
 
-    socket.emit("ai-message", { chatID, content, tempID });
+    socket.emit("ai-message", {
+      chatID,
+      content,
+      file: selectedFile ? true : false,
+      fileData: selectedFile ? selectedFile.buffer : null,
+      fileType: selectedFile ? selectedFile.fileType : null,
+      tempID,
+    });
+
+    setSelectedFile(null)
   };
 
   const handleImageGeneration = async (content) => {
@@ -98,6 +110,7 @@ const Home = () => {
       prompt: content,
     });
   };
+
 
   const handlechatselect = (id) => {
     setChatID(id);
@@ -160,6 +173,7 @@ const Home = () => {
           setImageGen={setImageGen}
           loadingMessage={loadingMessage}
           loadingImage={loadingImage}
+          setSelectedFile={setSelectedFile}
         />
       </div>
     </>

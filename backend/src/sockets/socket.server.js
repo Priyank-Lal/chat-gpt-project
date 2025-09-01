@@ -9,6 +9,7 @@ const {
   generateImage,
 } = require("../services/ai.service");
 const { createMemory, queryMemory } = require("../services/vector.service");
+const { uploadImage } = require("../services/cloudinary.service");
 
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
@@ -40,12 +41,25 @@ function initSocketServer(httpServer) {
     socket.on("ai-message", async (messagePayload) => {
       socket.emit("ai-response-start");
 
+      let uploadedFileUrl = null;
+
+      if (messagePayload.file && messagePayload.fileData) {
+        const buffer = Buffer.from(messagePayload.fileData);
+        const base64Data = buffer.toString("base64");
+        const dataUri = `data:${messagePayload.fileType};base64,${base64Data}`;
+
+        const uploaded = await uploadImage(dataUri); // pass as string
+        uploadedFileUrl = uploaded
+      }
+
+      
       const [messageFromUser, userVectors] = await Promise.all([
         messageModel.create({
           userID: socket.user._id,
           chatID: messagePayload.chatID,
           content: messagePayload.content,
-          file: false,
+          file: messagePayload.file || false,
+          fileUrl: uploadedFileUrl,
           role: "user",
         }),
         generateVector(messagePayload.content),
@@ -85,12 +99,27 @@ function initSocketServer(httpServer) {
         ).reverse(),
       ]);
 
-      const shortTermMemory = chatHistory.map((item) => {
-        return {
-          role: item.role,
-          parts: [{ text: item.content }],
-        };
-      });
+      const shortTermMemory = await Promise.all(
+        chatHistory.map(async (item) => {
+          const parts = [];
+          if (item.fileUrl) {
+            const fileData = await fetch(item.fileUrl);
+            const imageArrayBuffer = await fileData.arrayBuffer();
+            const base64ImageData =
+              Buffer.from(imageArrayBuffer).toString("base64");
+            parts.push({
+              inlineData: {
+                mimeType: item.fileType || "image/png",
+                data: base64ImageData,
+              },
+            });
+          }
+          if (item.content) {
+            parts.push({ text: item.content });
+          }
+          return { role: item.role, parts };
+        })
+      );
 
       const longTermMemory = [
         {
@@ -155,11 +184,13 @@ function initSocketServer(httpServer) {
 
         const { text, imageUrl } = await generateImage(payload.prompt);
 
+        // Save the imageUrl as fileUrl and remove imageUrl from content
         const responseToUser = await messageModel.create({
           userID: socket.user._id,
           chatID: payload.chatID,
-          content: { text, imageUrl },
+          content: text,
           file: true,
+          fileUrl: imageUrl,
           role: "model",
         });
 

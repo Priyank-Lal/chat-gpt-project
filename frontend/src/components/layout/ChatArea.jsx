@@ -31,21 +31,6 @@ import {
   faThumbsDown,
 } from "@fortawesome/free-solid-svg-icons";
 
-// Bot avatar component
-const BotAvatar = () => (
-  <div className="w-8 h-8 flex-shrink-0 bg-[#10a37f] rounded-full flex items-center justify-center shadow-sm">
-    <span className="text-white font-bold text-sm">G</span>
-  </div>
-);
-
-// User avatar component
-const UserAvatar = ({ user }) => (
-  <div className="w-8 h-8 flex-shrink-0 bg-[#ab68ff] rounded-full flex items-center justify-center shadow-sm">
-    <User size={16} className="text-white" />
-  </div>
-);
-
-// Empty state component
 const EmptyState = ({ onNewChat }) => (
   <div className="flex flex-col items-center justify-center h-full text-center p-8 max-w-2xl mx-auto">
     <motion.div
@@ -105,6 +90,8 @@ const ChatArea = ({
   setImageGen,
   loadingMessage,
   loadingImage,
+  setSelectedFile,
+  handleFileUpload,
 }) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -174,9 +161,23 @@ const ChatArea = ({
                     className="group"
                   >
                     {message.role === "user" ? (
-                      // User message with bubble
+                      // User message with small avatar + separate bubble
                       <div className="flex justify-end mb-4">
-                        <div className="flex items-start gap-3 max-w-[80%]">
+                        <div className="flex flex-col items-end gap-2 max-w-[80%]">
+                          {/* Small user image/avatar */}
+                          {message.file ? (
+                            <img
+                              src={message.fileUrl}
+                              alt="User uploaded"
+                              className="max-w-100 max-h-100 rounded-lg object-cover border border-[#3a3a3a] shadow"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-[#2f2f2f] rounded-lg flex items-center justify-center text-sm text-white">
+                              <User size={18} />
+                            </div>
+                          )}
+
+                          {/* Message bubble */}
                           <div className="bg-[#2f2f2f] text-white px-4 py-3 rounded-2xl rounded-br-md shadow-sm">
                             <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
                               {message.content}
@@ -198,7 +199,7 @@ const ChatArea = ({
                             {message.file ? (
                               <>
                                 <img
-                                  src={message.content.imageUrl}
+                                  src={message.fileUrl}
                                   alt="AI Generated"
                                   className="rounded-lg max-w-xs md:max-w-sm lg:max-w-md border border-[#3a3a3a] shadow"
                                 />
@@ -270,7 +271,7 @@ const ChatArea = ({
                               onClick={() => {
                                 if (message.file) {
                                   navigator.clipboard.writeText(
-                                    message.content.imageUrl
+                                    message.fileUrl
                                   );
                                 } else {
                                   navigator.clipboard.writeText(
@@ -448,6 +449,7 @@ const ChatArea = ({
               onSend={handleSendMessage}
               imageGen={imageGen}
               setImageGen={setImageGen}
+              setSelectedFile={setSelectedFile}
             />
           </div>
         </div>

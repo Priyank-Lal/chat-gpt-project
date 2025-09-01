@@ -70,7 +70,8 @@ export default function AiInput({
   handleKeyPress,
   onSend,
   imageGen,
-  setImageGen
+  setImageGen,
+  setSelectedFile,
 }) {
   // const [value, setValue] = useState("");
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -94,6 +95,17 @@ export default function AiInput({
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const arrayBuffer = reader.result;
+        setSelectedFile({
+          fileName: file.name,
+          fileType: file.type,
+          buffer: arrayBuffer,
+        });
+      };
+      reader.readAsArrayBuffer(file);
     } else {
       setImagePreview(null);
     }
@@ -102,7 +114,7 @@ export default function AiInput({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (value.trim() || imagePreview) {
-      onSend()
+      onSend();
     }
 
     if (imagePreview) {
