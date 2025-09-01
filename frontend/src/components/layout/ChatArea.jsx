@@ -11,7 +11,7 @@ import {
   Check,
 } from "lucide-react";
 import AiInput from "../ui/ai-input";
-import { motion, AnimatePresence, isObject } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -91,12 +91,13 @@ const ChatArea = ({
   loadingMessage,
   loadingImage,
   setSelectedFile,
-  handleFileUpload,
+  setFileUrl,
 }) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
   const [isCopyIcon, setIsCopyIcon] = useState(true);
   const [reactions, setReactions] = useState({});
+  const [fileImageLoading, setFileImageLoading] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -165,16 +166,12 @@ const ChatArea = ({
                       <div className="flex justify-end mb-4">
                         <div className="flex flex-col items-end gap-2 max-w-[80%]">
                           {/* Small user image/avatar */}
-                          {message.file ? (
+                          {message.file === true && (
                             <img
                               src={message.fileUrl}
                               alt="User uploaded"
                               className="max-w-100 max-h-100 rounded-lg object-cover border border-[#3a3a3a] shadow"
                             />
-                          ) : (
-                            <div className="w-10 h-10 bg-[#2f2f2f] rounded-lg flex items-center justify-center text-sm text-white">
-                              <User size={18} />
-                            </div>
                           )}
 
                           {/* Message bubble */}
@@ -450,6 +447,7 @@ const ChatArea = ({
               imageGen={imageGen}
               setImageGen={setImageGen}
               setSelectedFile={setSelectedFile}
+              setFileUrl={setFileUrl}
             />
           </div>
         </div>

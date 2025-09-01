@@ -21,6 +21,7 @@ const Home = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
+  const [fileUrl, setFileUrl] = useState(null);
 
   const messages = useSelector((state) => state.chat.messages[chatID]);
 
@@ -85,6 +86,7 @@ const Home = () => {
       chatID,
       file: selectedFile ? true : false,
       fileType: selectedFile ? selectedFile.fileType : null,
+      fileUrl,
       content,
       role: "user",
     };
@@ -99,7 +101,7 @@ const Home = () => {
       tempID,
     });
 
-    setSelectedFile(null)
+    setSelectedFile(null);
   };
 
   const handleImageGeneration = async (content) => {
@@ -110,7 +112,6 @@ const Home = () => {
       prompt: content,
     });
   };
-
 
   const handlechatselect = (id) => {
     setChatID(id);
@@ -174,6 +175,7 @@ const Home = () => {
           loadingMessage={loadingMessage}
           loadingImage={loadingImage}
           setSelectedFile={setSelectedFile}
+          setFileUrl={setFileUrl}
         />
       </div>
     </>

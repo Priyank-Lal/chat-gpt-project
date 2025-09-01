@@ -49,10 +49,10 @@ function initSocketServer(httpServer) {
         const dataUri = `data:${messagePayload.fileType};base64,${base64Data}`;
 
         const uploaded = await uploadImage(dataUri); // pass as string
-        uploadedFileUrl = uploaded
+        uploadedFileUrl = uploaded;
       }
 
-      
+
       const [messageFromUser, userVectors] = await Promise.all([
         messageModel.create({
           userID: socket.user._id,

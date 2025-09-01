@@ -72,6 +72,7 @@ export default function AiInput({
   imageGen,
   setImageGen,
   setSelectedFile,
+  setFileUrl,
 }) {
   // const [value, setValue] = useState("");
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -94,8 +95,9 @@ export default function AiInput({
     const file = e.target.files ? e.target.files[0] : null;
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
 
+      setImagePreview(previewUrl);
+      setFileUrl(previewUrl);
       const reader = new FileReader();
       reader.onload = () => {
         const arrayBuffer = reader.result;
@@ -113,23 +115,33 @@ export default function AiInput({
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (value.trim() || imagePreview) {
-      onSend();
-    }
+    if (!value.trim() && !imagePreview) return;
 
-    if (imagePreview) {
-      setImagePreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    console.log("rummimg");
+
+    // Clear the preview immediately
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input
     }
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input
+    }
+    // Clear selected file for parent
+    setSelectedFile(null);
+    setFileUrl(null);
+
+    // Send message with tempPreview
+    onSend();
+
+    // Clear input value
+    setValue("");
     adjustHeight(true);
   };
-  useEffect(() => {
-    return () => {
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
-      }
-    };
-  }, [imagePreview]);
+  // useEffect(() => {
+  //   if (!imagePreview) return;
+  //   return () => URL.revokeObjectURL(imagePreview);
+  // }, [imagePreview]);
 
   useEffect(() => {
     adjustHeight();
@@ -142,8 +154,9 @@ export default function AiInput({
 
         <div className="relative rounded-2xl border border-black/5 bg-[#2f2f2f] flex flex-col">
           <AnimatePresence>
-            {imagePreview && (
+            {imagePreview != null && (
               <motion.div
+                key={imagePreview} // << add this
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
@@ -177,7 +190,23 @@ export default function AiInput({
                 placeholder=""
                 className="w-full rounded-2xl rounded-b-none px-4 py-3 bg-black/5 dark:bg-white/5 border-none dark:text-white resize-none focus-visible:ring-0 leading-[1.2]"
                 ref={textareaRef}
-                onKeyDown={handleKeyPress}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleKeyPress(e);
+                    // Clear the preview immediately
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = ""; // Clear the file input
+                    }
+                    setImagePreview(null);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = ""; // Clear the file input
+                    }
+                    // Clear selected file for parent
+                    setSelectedFile(null);
+                    setFileUrl(null);
+                  }
+                }}
                 onChange={(e) => setValue(e.target.value)}
                 style={{ height: `${MIN_HEIGHT}px` }}
                 rows={1}
