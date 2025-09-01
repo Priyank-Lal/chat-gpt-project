@@ -15,6 +15,10 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    file: {
+      type: Boolean,
+      required: true,
+    },
     role: {
       type: String,
       enum: ["user", "model"],

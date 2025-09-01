@@ -203,3 +203,8 @@ body {
     @apply ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
   }
 }
+.prose ul,
+.prose ol {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}

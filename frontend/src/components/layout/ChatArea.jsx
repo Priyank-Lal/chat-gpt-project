@@ -12,6 +12,10 @@ import {
 import AiInput from "../ui/ai-input";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 // Bot avatar component
 const BotAvatar = () => (
@@ -139,13 +143,16 @@ const ChatArea = ({
             <EmptyState onNewChat={handleNewChat} />
           ) : (
             <div className="space-y-6 p-4">
-              <AnimatePresence>
+              <AnimatePresence initial={false}>
                 {displayMessages.map((message) => (
                   <motion.div
-                    key={message._id}
-                    initial={{ opacity: 0, y: 20 }}
+                    key={message.clientKey || message._id}
+                    initial={
+                      message._id.startsWith("temp")
+                        ? { opacity: 0, y: 20 }
+                        : { opacity: 1, y: 0 }
+                    }
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     layout
                     className="group"
@@ -159,7 +166,6 @@ const ChatArea = ({
                               {message.content}
                             </div>
                           </div>
-                          <UserAvatar />
                         </div>
                       </div>
                     ) : (
@@ -168,9 +174,8 @@ const ChatArea = ({
                         <BotAvatar />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
-                            {message.image ? (
+                            {message.file ? (
                               <>
-                                <p>{message.content.text}</p>
                                 <img
                                   src={message.content.imageUrl}
                                   alt="AI Generated"
@@ -178,18 +183,106 @@ const ChatArea = ({
                                 />
                               </>
                             ) : (
-                              <>{message.content}</>
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <div className="prose prose-invert max-w-none">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                      ul: ({ node, ...props }) => (
+                                        <ul
+                                          className="list-disc pl-6 space-y-0.5"
+                                          {...props}
+                                        />
+                                      ),
+                                      ol: ({ node, ...props }) => (
+                                        <ol
+                                          className="list-decimal pl-6 space-y-0.5"
+                                          {...props}
+                                        />
+                                      ),
+                                      li: ({ node, ...props }) => (
+                                        <li className="mb-1" {...props} />
+                                      ),
+                                      code({
+                                        inline,
+                                        className,
+                                        children,
+                                        ...props
+                                      }) {
+                                        const match = /language-(\w+)/.exec(
+                                          className || ""
+                                        );
+                                        return !inline && match ? (
+                                          <SyntaxHighlighter
+                                            style={oneDark}
+                                            language={match[1]}
+                                            PreTag="div"
+                                            {...props}
+                                          >
+                                            {String(children).replace(
+                                              /\n$/,
+                                              ""
+                                            )}
+                                          </SyntaxHighlighter>
+                                        ) : (
+                                          <code className="bg-[#2a2a2a] px-1 py-0.5 rounded-2xl text-pink-400">
+                                            {children}
+                                          </code>
+                                        );
+                                      },
+                                    }}
+                                  >
+                                    {message.content}
+                                  </ReactMarkdown>
+                                </div>
+                              </motion.div>
                             )}
                           </div>
                           {/* Action buttons */}
                           <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
+                            <button
+                              className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+                              onClick={() => {
+                                if (message.file) {
+                                  navigator.clipboard.writeText(
+                                    message.content.imageUrl
+                                  );
+                                } else {
+                                  navigator.clipboard.writeText(
+                                    message.content
+                                  );
+                                }
+                                console.log(
+                                  "Copied message content to clipboard"
+                                );
+                              }}
+                            >
                               <Copy size={14} />
                             </button>
-                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
+                            <button
+                              className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+                              onClick={() => {
+                                console.log(
+                                  "Thumbs up for message",
+                                  message._id
+                                );
+                              }}
+                            >
                               <ThumbsUp size={14} />
                             </button>
-                            <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
+                            <button
+                              className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+                              onClick={() => {
+                                console.log(
+                                  "Thumbs down for message",
+                                  message._id
+                                );
+                              }}
+                            >
                               <ThumbsDown size={14} />
                             </button>
                             <button className="p-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200">
@@ -227,7 +320,6 @@ const ChatArea = ({
                 </motion.div>
               )}
 
-              {/* Show skeleton for image loader */}
               {loadingImage && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -235,10 +327,9 @@ const ChatArea = ({
                   className="flex items-start gap-3"
                 >
                   <BotAvatar />
-                  <div className="rounded-lg max-w-xs md:max-w-sm lg:max-w-md bg-[#2a2a2a] animate-pulse border border-[#3a3a3a]" />
+                  <div className="h-110 w-110 rounded-lg bg-[#2a2a2a] animate-pulse border border-[#3a3a3a]" />
                 </motion.div>
               )}
-
               {/* Typing Indicator */}
               {isTyping && (
                 <motion.div

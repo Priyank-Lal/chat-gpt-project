@@ -52,7 +52,7 @@ const Home = () => {
         replaceMessage({
           chatID: messageFromUser.chatID,
           tempID,
-          confirmedMessage: messageFromUser,
+          confirmedMessage: { ...messageFromUser, clientKey: tempID },
         })
       );
     });
@@ -66,7 +66,7 @@ const Home = () => {
       dispatch(
         appendMessage({
           chatID: responseToUser.chatID,
-          message: { ...responseToUser, image: true },
+          message: responseToUser
         })
       );
     });
@@ -80,6 +80,7 @@ const Home = () => {
 
     const tempMessage = {
       _id: tempID,
+      clientKey: tempID, // stable key to prevent re-mount animation
       chatID,
       content,
       role: "user",

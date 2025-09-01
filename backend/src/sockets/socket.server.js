@@ -45,6 +45,7 @@ function initSocketServer(httpServer) {
           userID: socket.user._id,
           chatID: messagePayload.chatID,
           content: messagePayload.content,
+          file: false,
           role: "user",
         }),
         generateVector(messagePayload.content),
@@ -115,6 +116,7 @@ function initSocketServer(httpServer) {
           userID: socket.user._id,
           chatID: messagePayload.chatID,
           content: aiResponse,
+          file: false,
           role: "model",
         }),
         generateVector(aiResponse),
@@ -142,6 +144,7 @@ function initSocketServer(httpServer) {
           userID: socket.user._id,
           chatID: payload.chatID,
           content: payload.prompt,
+          file: false,
           role: "user",
         });
 
@@ -155,10 +158,8 @@ function initSocketServer(httpServer) {
         const responseToUser = await messageModel.create({
           userID: socket.user._id,
           chatID: payload.chatID,
-          content: {
-            text,
-            imageUrl,
-          },
+          content: { text, imageUrl },
+          file: true,
           role: "model",
         });
 
