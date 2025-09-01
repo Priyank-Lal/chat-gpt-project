@@ -12,7 +12,7 @@ const messageSchema = new mongoose.Schema(
       ref: "chats",
     },
     content: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
       required: true,
     },
     role: {

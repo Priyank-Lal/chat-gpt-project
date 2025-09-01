@@ -3,9 +3,12 @@ const cookie = require("cookie");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 const messageModel = require("../models/message.model");
-const { generateResponse, generateVector } = require("../services/ai.service");
+const {
+  generateResponse,
+  generateVector,
+  generateImage,
+} = require("../services/ai.service");
 const { createMemory, queryMemory } = require("../services/vector.service");
-const { generateImage } = require("../services/imageGeneration.service.js");
 
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
@@ -49,7 +52,7 @@ function initSocketServer(httpServer) {
 
       socket.emit("user-message", {
         messageFromUser,
-        tempID: messagePayload.tempID, // 👈 pass back
+        tempID: messagePayload.tempID,
       });
 
       await createMemory({
@@ -147,12 +150,15 @@ function initSocketServer(httpServer) {
           tempID: payload.tempID,
         });
 
-        const imageUrl = await generateImage(payload.prompt);
+        const { text, imageUrl } = await generateImage(payload.prompt);
 
         const responseToUser = await messageModel.create({
           userID: socket.user._id,
           chatID: payload.chatID,
-          content: imageUrl,
+          content: {
+            text,
+            imageUrl,
+          },
           role: "model",
         });
 

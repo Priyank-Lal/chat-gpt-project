@@ -1,4 +1,6 @@
 const { GoogleGenAI, Modality } = require("@google/genai");
+const fs = require("fs");
+const { uploadImage } = require("./cloudinary.service");
 
 const ai = new GoogleGenAI({});
 
@@ -124,22 +126,41 @@ const generateVector = async (content) => {
   return response.embeddings[0].values;
 };
 
-// const generateImage = async () => {
-//   const response = await ai.models.generateContent({
-//     model: "imagen-3.0-generate-002",
-//     contents: ["Create a 3D rendered planet with rings"],
-//     config: {
-//       responseModalities: ["TEXT", "IMAGE"],
-//     },
-//   });
+const generateImage = async (prompt) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-preview-image-generation",
+      contents: prompt,
+      config: {
+        responseModalities: [Modality.TEXT, Modality.IMAGE],
+      },
+    });
 
-//   console.log(response.text);
-//   console.log(response.inlineDataParts[0].data); // image bytes
-// };
+    let text = null;
+    let imageUrl = null;
 
-// generateImage()
+    for (const part of response.candidates[0].content.parts) {
+      if (part.text) {
+        text = part.text;
+      } else if (part.inlineData) {
+        const imageData = part.inlineData.data;
+        const base64 = `data:image/png;base64,${imageData}`;
+        imageUrl = await uploadImage(base64);
+      }
+    }
 
+    if (!text && !imageUrl) {
+      throw new Error("No response from Gemini");
+    }
+
+    return { text, imageUrl };
+  } catch (err) {
+    console.error("❌ Error in generateImage:", err.message);
+    return { error: "Failed to generate image. Please try again later." };
+  }
+};
 module.exports = {
   generateResponse,
   generateVector,
+  generateImage
 };

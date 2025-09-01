@@ -114,7 +114,6 @@ const ChatArea = ({
 
   const displayMessages = messages?.length ? messages : [];
 
-
   return (
     <div
       className={cn(
@@ -170,11 +169,14 @@ const ChatArea = ({
                         <div className="flex-1 min-w-0">
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
                             {message.image ? (
-                              <img
-                                src={message.content}
-                                alt="AI Generated"
-                                className="rounded-lg max-w-xs md:max-w-sm lg:max-w-md border border-[#3a3a3a] shadow"
-                              />
+                              <>
+                                <p>{message.content.text}</p>
+                                <img
+                                  src={message.content.imageUrl}
+                                  alt="AI Generated"
+                                  className="rounded-lg max-w-xs md:max-w-sm lg:max-w-md border border-[#3a3a3a] shadow"
+                                />
+                              </>
                             ) : (
                               <>{message.content}</>
                             )}
@@ -233,7 +235,7 @@ const ChatArea = ({
                   className="flex items-start gap-3"
                 >
                   <BotAvatar />
-                  <div className="rounded-lg w-48 h-48 bg-[#2a2a2a] animate-pulse border border-[#3a3a3a]" />
+                  <div className="rounded-lg max-w-xs md:max-w-sm lg:max-w-md bg-[#2a2a2a] animate-pulse border border-[#3a3a3a]" />
                 </motion.div>
               )}
 
