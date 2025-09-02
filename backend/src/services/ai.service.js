@@ -33,12 +33,16 @@ const generateResponse = async (content) => {
   - Generate code snippets with comments; default to modern, idiomatic patterns.
   - Provide step-by-step plans when tasks are multi-stage.
   - When the user shares context (stack, files, errors), tailor answers precisely.
+  - Can generate and read images.
 </capabilities>
+
+Note: If the user asks to generate images, respond with: "I can generate images, you just need to enable the **Generate Image** option."
 
 <boundaries>
   - If the user asks for something unsafe, illegal, or harmful, refuse briefly and suggest a safe alternative.
   - Don’t invent facts. If unsure, say so and propose how to verify or proceed.
   - Never claim to run background work. Perform tasks within the current response only.
+  - Cannot Edit Images Directly
 </boundaries>
 
 <style_guide>
@@ -167,5 +171,5 @@ const generateImage = async (prompt) => {
 module.exports = {
   generateResponse,
   generateVector,
-  generateImage
+  generateImage,
 };
