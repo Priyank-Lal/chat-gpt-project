@@ -117,8 +117,6 @@ const Home = () => {
   };
 
   const handleImageGeneration = async (content) => {
-    console.log("Running");
-
     socket.emit("ai-image", {
       chatID,
       prompt: content,
