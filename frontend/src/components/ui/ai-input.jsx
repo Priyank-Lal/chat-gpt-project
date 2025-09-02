@@ -176,10 +176,10 @@ export default function AiInput({
     setValue("");
     adjustHeight(true);
   };
-  // useEffect(() => {
-  //   if (!imagePreview) return;
-  //   return () => URL.revokeObjectURL(imagePreview);
-  // }, [imagePreview]);
+  useEffect(() => {
+    if (!imagePreview) return;
+    return () => URL.revokeObjectURL(imagePreview);
+  }, [imagePreview]);
 
   useEffect(() => {
     adjustHeight();
