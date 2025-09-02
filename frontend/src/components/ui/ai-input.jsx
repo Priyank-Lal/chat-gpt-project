@@ -5,7 +5,13 @@ import { Globe, Paperclip, Plus, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faThumbsUp as farThumbsUp,
+  faThumbsDown as farThumbsDown,
+  faCopy,
+  faImage,
+} from "@fortawesome/free-regular-svg-icons";
 
 function useAutoResizeTextarea({ minHeight, maxHeight }) {
   const textareaRef = useRef(null);
@@ -268,18 +274,18 @@ export default function AiInput({
                 className={cn(
                   "rounded-full transition-all flex items-center gap-2 px-1.5 py-1 border h-8",
                   imageGen
-                    ? "bg-[#ff3f17]/15 border-[#ff3f17] text-[#ff3f17]"
+                    ? "bg-blue-500/15 border-blue-500 text-blue-500"
                     : "bg-black/5 dark:bg-white/5 border-transparent text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
                 )}
               >
                 <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
                   <motion.div
                     animate={{
-                      rotate: imageGen ? 180 : 0,
+                      rotate: imageGen ? [15] : 0,
                       scale: imageGen ? 1.1 : 1,
                     }}
                     whileHover={{
-                      rotate: imageGen ? 180 : 15,
+                      rotate: imageGen ? 15 : 15,
                       scale: 1.1,
                       transition: {
                         type: "spring",
@@ -293,11 +299,18 @@ export default function AiInput({
                       damping: 25,
                     }}
                   >
-                    <Globe
+                    {/* <Globe
                       className={cn(
                         "w-4 h-4",
                         imageGen ? "text-[#ff3f17]" : "text-inherit"
                       )}
+                    /> */}
+                    <FontAwesomeIcon
+                      className={cn(
+                        "w-4 h-4",
+                        imageGen ? "text-blue-500" : "text-inherit"
+                      )}
+                      icon={faImage}
                     />
                   </motion.div>
                 </div>
@@ -311,7 +324,7 @@ export default function AiInput({
                       }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="text-sm overflow-hidden whitespace-nowrap text-[#ff3f17] flex-shrink-0"
+                      className="text-sm overflow-hidden whitespace-nowrap text-blue-500 flex-shrink-0"
                     >
                       Generate Image
                     </motion.span>
