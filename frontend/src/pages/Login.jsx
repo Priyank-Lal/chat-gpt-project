@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Chrome, Eye,EyeClosed } from "lucide-react";
+import { Chrome, Eye, EyeClosed } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -67,11 +67,7 @@ const Login = () => {
             variants={itemVariants}
             className="flex items-center space-x-2"
           >
-            <img
-              src="../../../public/icons8-ai.svg"
-              alt="Nebula Logo"
-              className="w-8 h-8"
-            />
+            <img src="/icons8-ai.svg" alt="Nebula Logo" className="w-8 h-8" />
             <span className="text-2xl font-bold text-white">Nebula</span>
           </motion.div>
 

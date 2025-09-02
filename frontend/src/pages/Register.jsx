@@ -10,7 +10,6 @@ import { registerUser } from "../store/actions/userAction";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
-
 const Register = () => {
   const { register, handleSubmit, reset } = useForm();
   const [registerError, setRegisterError] = useState("");
@@ -70,11 +69,7 @@ const Register = () => {
             variants={itemVariants}
             className="flex items-center space-x-2"
           >
-            <img
-              src="../../../public/icons8-ai.svg"
-              alt="Nebula Logo"
-              className="w-8 h-8"
-            />
+            <img src="/icons8-ai.svg" alt="Nebula Logo" className="w-8 h-8" />
             <span className="text-2xl font-bold text-white">Nebula</span>
           </motion.div>
 

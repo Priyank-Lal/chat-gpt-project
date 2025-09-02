@@ -55,7 +55,6 @@ export const getUser = () => async (dispatch) => {
     dispatch(loadUser(data.user));
   } catch (error) {
     console.log(error);
-    toast("Failed to load user data. Please try again.");
   } finally {
     dispatch(setUserLoading(false));
   }
