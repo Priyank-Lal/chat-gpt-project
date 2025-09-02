@@ -5,6 +5,7 @@ const initialState = {
   messages: {},
   loading: false,
   creating: false,
+  isError: false,
 };
 
 const chatSlice = createSlice({
@@ -55,10 +56,13 @@ const chatSlice = createSlice({
       });
       state.chats = filteredChats;
     },
-    removeMessages: (state,action)=>{
-        const { chatID } = action.payload;
-        delete state.messages[chatID];
-    }
+    removeMessages: (state, action) => {
+      const { chatID } = action.payload;
+      delete state.messages[chatID];
+    },
+    errorHandler: (state, action) => {
+      state.isError = action.payload;
+    },
   },
 });
 
@@ -72,5 +76,6 @@ export const {
   appendChat,
   setCreating,
   removeChat,
-  removeMessages
+  removeMessages,
+  errorHandler
 } = chatSlice.actions;

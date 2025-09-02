@@ -5,7 +5,11 @@ import ChatArea from "../components/layout/ChatArea";
 import { getUser } from "../store/actions/userAction";
 import { useDispatch, useSelector } from "react-redux";
 import { createChat, getChats } from "../store/actions/chatActions";
-import { appendMessage, replaceMessage } from "../store/features/chatSlice";
+import {
+  appendMessage,
+  errorHandler,
+  replaceMessage,
+} from "../store/features/chatSlice";
 import { nanoid } from "@reduxjs/toolkit";
 import NavBar from "../components/layout/NavBar";
 
@@ -72,6 +76,10 @@ const Home = () => {
         })
       );
     });
+
+    tempSocket.on("ai-error", (error) => {
+      dispatch(errorHandler(true));
+    });
     setSocket(tempSocket);
 
     getUserDetails();
@@ -91,6 +99,7 @@ const Home = () => {
       role: "user",
     };
     dispatch(appendMessage({ chatID, message: tempMessage }));
+    dispatch(errorHandler(false));
 
     socket.emit("ai-message", {
       chatID,

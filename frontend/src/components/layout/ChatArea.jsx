@@ -30,6 +30,7 @@ import {
   faThumbsUp,
   faThumbsDown,
 } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from "react-redux";
 
 const EmptyState = ({ onNewChat }) => (
   <div className="flex flex-col items-center justify-center h-full text-center p-8 max-w-2xl mx-auto">
@@ -97,7 +98,8 @@ const ChatArea = ({
   const messagesEndRef = useRef(null);
   const [isCopyIcon, setIsCopyIcon] = useState(true);
   const [reactions, setReactions] = useState({});
-  const [fileImageLoading, setFileImageLoading] = useState(false);
+
+  const isError = useSelector((state) => state.chat.isError);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -193,7 +195,12 @@ const ChatArea = ({
                         />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
-                            {message.file ? (
+                            {/* Per-message error display inside bubble */}
+                            {message.role === "model" && isError ? (
+                              <div className="bg-red-600 text-white px-4 py-2 rounded-2xl shadow text-sm max-w-xl text-center">
+                                ⚠️ An error occurred while processing your request. Please try again.
+                              </div>
+                            ) : message.file ? (
                               <>
                                 <img
                                   src={message.fileUrl}
@@ -248,7 +255,7 @@ const ChatArea = ({
                                             )}
                                           </SyntaxHighlighter>
                                         ) : (
-                                          <code className="bg-[#2a2a2a] px-1 py-0.5 rounded-2xl text-pink-400">
+                                          <code className="bg-[#2a2a2a] px-1 py-0.5 text-pink-400">
                                             {children}
                                           </code>
                                         );

@@ -39,131 +39,135 @@ function initSocketServer(httpServer) {
 
   io.on("connection", (socket) => {
     socket.on("ai-message", async (messagePayload) => {
-      socket.emit("ai-response-start");
+      try {
+        socket.emit("ai-response-start");
 
-      let uploadedFileUrl = null;
+        let uploadedFileUrl = null;
 
-      if (messagePayload.file && messagePayload.fileData) {
-        const buffer = Buffer.from(messagePayload.fileData);
-        const base64Data = buffer.toString("base64");
-        const dataUri = `data:${messagePayload.fileType};base64,${base64Data}`;
+        if (messagePayload.file && messagePayload.fileData) {
+          const buffer = Buffer.from(messagePayload.fileData);
+          const base64Data = buffer.toString("base64");
+          const dataUri = `data:${messagePayload.fileType};base64,${base64Data}`;
 
-        const uploaded = await uploadImage(dataUri); // pass as string
-        uploadedFileUrl = uploaded;
-      }
+          const uploaded = await uploadImage(dataUri); // pass as string
+          uploadedFileUrl = uploaded;
+        }
 
-
-      const [messageFromUser, userVectors] = await Promise.all([
-        messageModel.create({
-          userID: socket.user._id,
-          chatID: messagePayload.chatID,
-          content: messagePayload.content,
-          file: messagePayload.file || false,
-          fileUrl: uploadedFileUrl,
-          role: "user",
-        }),
-        generateVector(messagePayload.content),
-      ]);
-
-      socket.emit("user-message", {
-        messageFromUser,
-        tempID: messagePayload.tempID,
-      });
-
-      await createMemory({
-        vectors: userVectors,
-        messageID: messageFromUser._id,
-        metadata: {
-          chatID: messagePayload.chatID,
-          userID: socket.user._id,
-          text: messagePayload.content,
-        },
-      });
-
-      const [memory, chatHistory] = await Promise.all([
-        queryMemory({
-          queryVector: userVectors,
-          limit: 5,
-          metadata: {
+        const [messageFromUser, userVectors] = await Promise.all([
+          messageModel.create({
             userID: socket.user._id,
+            chatID: messagePayload.chatID,
+            content: messagePayload.content,
+            file: messagePayload.file || false,
+            fileUrl: uploadedFileUrl,
+            role: "user",
+          }),
+          generateVector(messagePayload.content),
+        ]);
+
+        socket.emit("user-message", {
+          messageFromUser,
+          tempID: messagePayload.tempID,
+        });
+
+        await createMemory({
+          vectors: userVectors,
+          messageID: messageFromUser._id,
+          metadata: {
+            chatID: messagePayload.chatID,
+            userID: socket.user._id,
+            text: messagePayload.content,
           },
-        }),
-        (
-          await messageModel
-            .find({
-              chatID: messagePayload.chatID,
-            })
-            .sort({ createdAt: -1 })
-            .limit(20)
-            .lean()
-        ).reverse(),
-      ]);
+        });
 
-      const shortTermMemory = await Promise.all(
-        chatHistory.map(async (item) => {
-          const parts = [];
-          if (item.fileUrl) {
-            const fileData = await fetch(item.fileUrl);
-            const imageArrayBuffer = await fileData.arrayBuffer();
-            const base64ImageData =
-              Buffer.from(imageArrayBuffer).toString("base64");
-            parts.push({
-              inlineData: {
-                mimeType: item.fileType || "image/png",
-                data: base64ImageData,
-              },
-            });
-          }
-          if (item.content) {
-            parts.push({ text: item.content });
-          }
-          return { role: item.role, parts };
-        })
-      );
-
-      const longTermMemory = [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `
-          These are some previous messages from the chat, use them to generate a response: 
-          ${memory.map((item) => item.metadata.text).join("\n")}
-          `,
+        const [memory, chatHistory] = await Promise.all([
+          queryMemory({
+            queryVector: userVectors,
+            limit: 5,
+            metadata: {
+              userID: socket.user._id,
             },
-          ],
-        },
-      ];
+          }),
+          (
+            await messageModel
+              .find({
+                chatID: messagePayload.chatID,
+              })
+              .sort({ createdAt: -1 })
+              .limit(20)
+              .lean()
+          ).reverse(),
+        ]);
 
-      const aiResponse = await generateResponse([
-        ...longTermMemory,
-        ...shortTermMemory,
-      ]);
+        const shortTermMemory = await Promise.all(
+          chatHistory.map(async (item) => {
+            const parts = [];
+            if (item.fileUrl) {
+              const fileData = await fetch(item.fileUrl);
+              const imageArrayBuffer = await fileData.arrayBuffer();
+              const base64ImageData =
+                Buffer.from(imageArrayBuffer).toString("base64");
+              parts.push({
+                inlineData: {
+                  mimeType: item.fileType || "image/png",
+                  data: base64ImageData,
+                },
+              });
+            }
+            if (item.content) {
+              parts.push({ text: item.content });
+            }
+            return { role: item.role, parts };
+          })
+        );
 
-      const [responseToUser, responseVectors] = await Promise.all([
-        messageModel.create({
-          userID: socket.user._id,
-          chatID: messagePayload.chatID,
-          content: aiResponse,
-          file: false,
-          role: "model",
-        }),
-        generateVector(aiResponse),
-      ]);
+        const longTermMemory = [
+          {
+            role: "user",
+            parts: [
+              {
+                text: `
+            These are some previous messages from the chat, use them to generate a response: 
+            ${memory.map((item) => item.metadata.text).join("\n")}
+            `,
+              },
+            ],
+          },
+        ];
 
-      socket.emit("ai-response", {
-        responseToUser,
-      });
+        const aiResponse = await generateResponse([
+          ...longTermMemory,
+          ...shortTermMemory,
+        ]);
 
-      await createMemory({
-        vectors: responseVectors,
-        messageID: responseToUser._id,
-        metadata: {
-          chatID: messagePayload.chatID,
-          userID: socket.user._id,
-          text: aiResponse,
-        },
-      });
+        const [responseToUser, responseVectors] = await Promise.all([
+          messageModel.create({
+            userID: socket.user._id,
+            chatID: messagePayload.chatID,
+            content: aiResponse,
+            file: false,
+            role: "model",
+          }),
+          generateVector(aiResponse),
+        ]);
+
+        socket.emit("ai-response", {
+          responseToUser,
+        });
+
+        await createMemory({
+          vectors: responseVectors,
+          messageID: responseToUser._id,
+          metadata: {
+            chatID: messagePayload.chatID,
+            userID: socket.user._id,
+            text: aiResponse,
+          },
+        });
+      } catch (err) {
+        console.error("❌ Error in ai-message:", err);
+        socket.emit("ai-error", { error: "An error occurred while processing your message." });
+      }
     });
 
     socket.on("ai-image", async (payload) => {
