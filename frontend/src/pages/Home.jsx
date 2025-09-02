@@ -72,24 +72,20 @@ const Home = () => {
         })
       );
     });
-
-    tempSocket.on("ai-error", (error) => {
+    tempSocket.on("ai-error", ({ chatID, tempID, errorMessage }) => {
       setLoadingMessage(false);
       setLoadingImage(false);
 
-      // Add error message to chat
-      const errorMessage = {
-        _id: "error-" + nanoid(),
-        chatID,
-        content:
-          "I apologize, but I encountered an error while processing your request. Please try again.",
-        role: "error",
-        createdAt: new Date().toISOString(),
-      };
-
-      if (chatID) {
-        dispatch(appendMessage({ chatID, message: errorMessage }));
-      }
+      dispatch(
+        replaceMessage({
+          chatID,
+          tempID,
+          confirmedMessage: {
+            ...errorMessage,
+            clientKey: tempID || errorMessage._id,
+          },
+        })
+      );
     });
     setSocket(tempSocket);
 
@@ -157,7 +153,7 @@ const Home = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleNewChat = async () => {
+  const handleNewChat = async (title) => {
     const response = await dispatch(createChat({ title }));
     if (response) {
       handlechatselect(response._id);

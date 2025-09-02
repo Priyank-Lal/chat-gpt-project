@@ -23,7 +23,7 @@ const messageSchema = new mongoose.Schema(
     fileType: { type: String, default: null },
     role: {
       type: String,
-      enum: ["user", "model"],
+      enum: ["user", "model", "error"],
       default: "user",
     },
   },

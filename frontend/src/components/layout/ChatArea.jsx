@@ -9,6 +9,7 @@ import {
   User,
   Bot,
   Check,
+  AlertCircleIcon,
 } from "lucide-react";
 import AiInput from "../ui/ai-input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,7 +31,7 @@ import {
   faThumbsUp,
   faThumbsDown,
 } from "@fortawesome/free-solid-svg-icons";
-import { useSelector } from "react-redux";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EmptyState = ({ onNewChat }) => (
   <div className="flex flex-col items-center justify-center h-full text-center p-8 max-w-2xl mx-auto">
@@ -190,14 +191,23 @@ const ChatArea = ({
                           src="../../../icons8-ai.svg"
                           className="w-6 h-6"
                           alt=""
-                        />
+                        />{" "}
                         <div className="flex-1 min-w-0">
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
                             {/* Error message display */}
                             {message.role === "error" ? (
-                              <div className="bg-red-600 text-white px-4 py-2 rounded-2xl shadow text-sm max-w-xl text-center">
-                                ⚠️ {message.content}
-                              </div>
+
+                                <Alert
+                                  variant="destructive"
+                                  className="px-4 py-2 rounded-2xl shadow text-sm max-w-xl"
+                                >
+                                  <AlertCircleIcon />
+                                  <AlertTitle>Error Occured</AlertTitle>
+                                  <AlertDescription>
+                                    {message.content}
+                                  </AlertDescription>
+                                </Alert>
+
                             ) : message.file ? (
                               <>
                                 <img

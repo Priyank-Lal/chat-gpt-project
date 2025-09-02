@@ -118,7 +118,10 @@ function initSocketServer(httpServer) {
             if (item.content) {
               parts.push({ text: item.content });
             }
-            return { role: item.role, parts };
+            return {
+              role: item.role === "error" ? "model" : item.role,
+              parts,
+            };
           })
         );
 
@@ -167,8 +170,20 @@ function initSocketServer(httpServer) {
         });
       } catch (err) {
         console.error("❌ Error in ai-message:", err);
+
+        const errorMessage = await messageModel.create({
+          userID: socket.user._id,
+          chatID: messagePayload.chatID,
+          content: "⚠️ I couldn’t process your request. Please try again.",
+          file: false,
+          role: "error",
+        });
+
         socket.emit("ai-error", {
-          error: "An error occurred while processing your message.",
+          chatID: messagePayload.chatID,
+          tempID: messagePayload.tempID,
+          content: errorMessage.content,
+          errorMessage, // send full saved object
         });
       }
     });
@@ -209,7 +224,21 @@ function initSocketServer(httpServer) {
         });
       } catch (err) {
         console.error("❌ Error in ai-image:", err.message);
-        socket.emit("ai-error", { error: "Failed to generate image" });
+
+        const errorMessage = await messageModel.create({
+          userID: socket.user._id,
+          chatID: payload.chatID,
+          content: "⚠️ Failed to generate image. Please try again.",
+          file: false,
+          role: "error",
+        });
+
+        socket.emit("ai-error", {
+          chatID: payload.chatID,
+          tempID: payload.tempID,
+          content: errorMessage.content,
+          errorMessage,
+        });
       }
     });
   });
