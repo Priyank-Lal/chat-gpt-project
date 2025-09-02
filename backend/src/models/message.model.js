@@ -19,11 +19,8 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       required: false,
     },
-    fileData: {
-      type: mongoose.Schema.Types.Mixed,
-      required: false,
-    },
     fileUrl: { type: String, default: null },
+    fileType: { type: String, default: null },
     role: {
       type: String,
       enum: ["user", "model"],

@@ -82,6 +82,15 @@ export default function AiInput({
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
 
+  const clearFileState = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setImagePreview(null);
+    setSelectedFile(null);
+    setFileUrl(null);
+  };
+
   const handleClosePreview = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -119,17 +128,7 @@ export default function AiInput({
 
     console.log("rummimg");
 
-    // Clear the preview immediately
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Clear the file input
-    }
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Clear the file input
-    }
-    // Clear selected file for parent
-    setSelectedFile(null);
-    setFileUrl(null);
+    clearFileState();
 
     // Send message with tempPreview
     onSend();
@@ -194,17 +193,7 @@ export default function AiInput({
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleKeyPress(e);
-                    // Clear the preview immediately
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = ""; // Clear the file input
-                    }
-                    setImagePreview(null);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = ""; // Clear the file input
-                    }
-                    // Clear selected file for parent
-                    setSelectedFile(null);
-                    setFileUrl(null);
+                    clearFileState();
                   }
                 }}
                 onChange={(e) => setValue(e.target.value)}

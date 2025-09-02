@@ -11,17 +11,25 @@ import { useDispatch } from "react-redux";
 
 const Register = () => {
   const { register, handleSubmit, reset } = useForm();
+  const [registerError, setRegisterError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
 
   const registerHandler = async (userDetails) => {
+    setIsLoading(true);
+    setRegisterError("");
+
     const result = await dispatch(registerUser(userDetails));
 
     if (result?.success) {
       navigateTo("/");
     } else {
-      alert("An error occured");
+      setRegisterError(
+        "Registration failed. Please check your details and try again."
+      );
     }
+    setIsLoading(false);
   };
 
   const containerVariants = {
@@ -72,6 +80,17 @@ const Register = () => {
               Welcome to Nebula! Please enter your details.
             </p>
           </motion.div>
+
+          {/* Error Message */}
+          {registerError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+            >
+              {registerError}
+            </motion.div>
+          )}
 
           {/* Form */}
           <motion.form
@@ -148,9 +167,10 @@ const Register = () => {
             <motion.div variants={itemVariants} className="space-y-4">
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors cursor-pointer"
               >
-                Sign in
+                {isLoading ? "Creating account..." : "Create account"}
               </Button>
 
               <Button

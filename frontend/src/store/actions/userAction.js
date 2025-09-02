@@ -47,7 +47,8 @@ export const getUser = () => async (dispatch) => {
     const { data } = await api.get("/api/user");
     dispatch(loadUser(data.user));
   } catch (error) {
-    alert("An Error occured");
     console.log(error);
+    // TODO: Replace with toast notification system
+    alert("Failed to load user data. Please try again.");
   }
 };

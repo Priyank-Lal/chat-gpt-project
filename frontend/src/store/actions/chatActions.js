@@ -14,12 +14,13 @@ export const createChat = (title) => async (dispatch) => {
     dispatch(setCreating(true));
     const { data } = await api.post("/api/chat", title);
     console.log(data.chat);
-    
+
     dispatch(appendChat(data.chat));
     return data.chat;
   } catch (error) {
-    alert("An error Occured");
     console.log(error);
+    // TODO: Replace with toast notification system
+    alert("Failed to create chat. Please try again.");
   } finally {
     dispatch(setCreating(false));
   }
@@ -31,8 +32,9 @@ export const getChats = () => async (dispatch) => {
     const { data } = await api.get("/api/chat/get-chats");
     dispatch(loadChats(data.chats));
   } catch (error) {
-    alert("An error Occured");
     console.log(error);
+    // TODO: Replace with toast notification system
+    alert("Failed to load chats. Please try again.");
   } finally {
     dispatch(setLoading(false));
   }
@@ -50,8 +52,9 @@ export const getMessages = (chatID) => async (dispatch, getState) => {
 
     dispatch(loadMessages({ chatID, messages: data.messages }));
   } catch (error) {
-    alert("An error Occured");
     console.log(error);
+    // TODO: Replace with toast notification system
+    alert("Failed to load messages. Please try again.");
   }
 };
 
@@ -63,7 +66,8 @@ export const deleteChat = (chatID) => async (dispatch) => {
     dispatch(removeChat({ chatID }));
     dispatch(removeMessages({ chatID }));
   } catch (error) {
-    alert("An error Occured");
     console.log(error);
+    // TODO: Replace with toast notification system
+    alert("Failed to delete chat. Please try again.");
   }
 };

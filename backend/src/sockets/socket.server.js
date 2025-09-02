@@ -60,6 +60,7 @@ function initSocketServer(httpServer) {
             content: messagePayload.content,
             file: messagePayload.file || false,
             fileUrl: uploadedFileUrl,
+            fileType: messagePayload.fileType,
             role: "user",
           }),
           generateVector(messagePayload.content),
@@ -166,7 +167,9 @@ function initSocketServer(httpServer) {
         });
       } catch (err) {
         console.error("❌ Error in ai-message:", err);
-        socket.emit("ai-error", { error: "An error occurred while processing your message." });
+        socket.emit("ai-error", {
+          error: "An error occurred while processing your message.",
+        });
       }
     });
 

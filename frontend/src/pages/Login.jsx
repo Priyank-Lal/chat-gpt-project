@@ -11,17 +11,23 @@ import { loginUser } from "../store/actions/userAction";
 
 const Login = () => {
   const { register, handleSubmit, reset } = useForm();
+  const [loginError, setLoginError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
 
   const loginHandler = async (userDetails) => {
+    setIsLoading(true);
+    setLoginError("");
+
     const result = await dispatch(loginUser(userDetails));
 
     if (result?.success) {
       navigateTo("/");
     } else {
-      alert("An error occured");
+      setLoginError("Invalid email or password. Please try again.");
     }
+    setIsLoading(false);
   };
 
   const containerVariants = {
@@ -73,6 +79,17 @@ const Login = () => {
             </p>
           </motion.div>
 
+          {/* Error Message */}
+          {loginError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+            >
+              {loginError}
+            </motion.div>
+          )}
+
           {/* Form */}
           <motion.form
             onSubmit={handleSubmit(loginHandler)}
@@ -115,9 +132,10 @@ const Login = () => {
             <motion.div variants={itemVariants} className="space-y-4">
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors cursor-pointer"
               >
-                Sign in
+                {isLoading ? "Signing in..." : "Sign in"}
               </Button>
 
               <Button

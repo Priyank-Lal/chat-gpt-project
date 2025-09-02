@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteChat, getMessages } from "../../store/actions/chatActions";
 import { Skeleton } from "@/components/ui/skeleton";
+import NewChatDialog from "@/components/ui/new-chat-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -151,13 +152,7 @@ const Sidebar = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Button
-              onClick={onNewChat}
-              className="w-full bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white font-medium transition-all duration-200 rounded-lg h-10 border border-[#3a3a3a] hover:border-[#4a4a4a]"
-            >
-              <Plus size={16} className="mr-2" />
-              New chat
-            </Button>
+            <NewChatDialog onCreateChat={onNewChat} isCreating={isCreating} />
           </motion.div>
         </div>
 

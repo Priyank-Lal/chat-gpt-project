@@ -5,11 +5,7 @@ import ChatArea from "../components/layout/ChatArea";
 import { getUser } from "../store/actions/userAction";
 import { useDispatch, useSelector } from "react-redux";
 import { createChat, getChats } from "../store/actions/chatActions";
-import {
-  appendMessage,
-  errorHandler,
-  replaceMessage,
-} from "../store/features/chatSlice";
+import { appendMessage, replaceMessage } from "../store/features/chatSlice";
 import { nanoid } from "@reduxjs/toolkit";
 import NavBar from "../components/layout/NavBar";
 
@@ -78,7 +74,22 @@ const Home = () => {
     });
 
     tempSocket.on("ai-error", (error) => {
-      dispatch(errorHandler(true));
+      setLoadingMessage(false);
+      setLoadingImage(false);
+
+      // Add error message to chat
+      const errorMessage = {
+        _id: "error-" + nanoid(),
+        chatID,
+        content:
+          "I apologize, but I encountered an error while processing your request. Please try again.",
+        role: "error",
+        createdAt: new Date().toISOString(),
+      };
+
+      if (chatID) {
+        dispatch(appendMessage({ chatID, message: errorMessage }));
+      }
     });
     setSocket(tempSocket);
 
@@ -99,7 +110,6 @@ const Home = () => {
       role: "user",
     };
     dispatch(appendMessage({ chatID, message: tempMessage }));
-    dispatch(errorHandler(false));
 
     socket.emit("ai-message", {
       chatID,
@@ -148,11 +158,10 @@ const Home = () => {
   }, []);
 
   const handleNewChat = async () => {
-    const title = prompt("Enter the title of your chat");
-
     const response = await dispatch(createChat({ title }));
-
-    handlechatselect(response.chatID);
+    if (response) {
+      handlechatselect(response._id);
+    }
   };
 
   return (

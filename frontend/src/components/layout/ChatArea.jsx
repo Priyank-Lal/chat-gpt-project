@@ -99,8 +99,6 @@ const ChatArea = ({
   const [isCopyIcon, setIsCopyIcon] = useState(true);
   const [reactions, setReactions] = useState({});
 
-  const isError = useSelector((state) => state.chat.isError);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
@@ -195,10 +193,10 @@ const ChatArea = ({
                         />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
-                            {/* Per-message error display inside bubble */}
-                            {message.role === "model" && isError ? (
+                            {/* Error message display */}
+                            {message.role === "error" ? (
                               <div className="bg-red-600 text-white px-4 py-2 rounded-2xl shadow text-sm max-w-xl text-center">
-                                ⚠️ An error occurred while processing your request. Please try again.
+                                ⚠️ {message.content}
                               </div>
                             ) : message.file ? (
                               <>
