@@ -8,6 +8,7 @@ import {
   removeChat,
   removeMessages,
 } from "../features/chatSlice";
+import { toast } from "sonner";
 
 export const createChat = (title) => async (dispatch) => {
   try {
@@ -19,8 +20,7 @@ export const createChat = (title) => async (dispatch) => {
     return data.chat;
   } catch (error) {
     console.log(error);
-    // TODO: Replace with toast notification system
-    alert("Failed to create chat. Please try again.");
+    toast("Failed to create chat. Please try again.");
   } finally {
     dispatch(setCreating(false));
   }
@@ -33,8 +33,7 @@ export const getChats = () => async (dispatch) => {
     dispatch(loadChats(data.chats));
   } catch (error) {
     console.log(error);
-    // TODO: Replace with toast notification system
-    alert("Failed to load chats. Please try again.");
+    toast("Failed to load chats. Please try again.");
   } finally {
     dispatch(setLoading(false));
   }
@@ -53,8 +52,7 @@ export const getMessages = (chatID) => async (dispatch, getState) => {
     dispatch(loadMessages({ chatID, messages: data.messages }));
   } catch (error) {
     console.log(error);
-    // TODO: Replace with toast notification system
-    alert("Failed to load messages. Please try again.");
+    toast("Failed to load messages. Please try again.");
   }
 };
 
@@ -67,7 +65,6 @@ export const deleteChat = (chatID) => async (dispatch) => {
     dispatch(removeMessages({ chatID }));
   } catch (error) {
     console.log(error);
-    // TODO: Replace with toast notification system
-    alert("Failed to delete chat. Please try again.");
+    toast("Failed to delete chat. Please try again.");
   }
 };

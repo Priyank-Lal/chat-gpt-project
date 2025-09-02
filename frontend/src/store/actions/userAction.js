@@ -1,5 +1,6 @@
 import api from "../../api/api";
-import { loadUser } from "../features/userSlice";
+import { loadUser, logoutUser } from "../features/userSlice";
+import { toast } from "sonner";
 
 export const registerUser = (userDetails) => async (dispatch, getState) => {
   const email = userDetails.email.trim();
@@ -19,6 +20,8 @@ export const registerUser = (userDetails) => async (dispatch, getState) => {
     return { success: true };
   } catch (error) {
     console.log(error);
+    toast("An error occured. Please try again.");
+
     return { success: false };
   }
 };
@@ -38,6 +41,8 @@ export const loginUser = (userDetails) => async (dispatch, getState) => {
     return { success: true };
   } catch (error) {
     console.log(error);
+    toast("An error occured. Please try again.");
+
     return { success: false };
   }
 };
@@ -48,7 +53,16 @@ export const getUser = () => async (dispatch) => {
     dispatch(loadUser(data.user));
   } catch (error) {
     console.log(error);
-    // TODO: Replace with toast notification system
-    alert("Failed to load user data. Please try again.");
+    toast("Failed to load user data. Please try again.");
+  }
+};
+
+export const logOutUser = () => async (dispatch) => {
+  try {
+    await api.post("/api/user/logout");
+    dispatch(logoutUser());
+  } catch (error) {
+    toast("An error occured. Please try again.");
+    console.log("Logout request failed:", error);
   }
 };

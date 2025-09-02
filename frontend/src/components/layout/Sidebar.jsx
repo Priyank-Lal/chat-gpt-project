@@ -10,6 +10,7 @@ import {
   Menu,
   Trash,
   MoreHorizontal,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,6 +31,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { logOutUser } from "../../store/actions/userAction";
+import { useNavigate } from "react-router-dom";
 
 // Framer Motion Variants for animations
 const sidebarVariants = {
@@ -84,6 +87,7 @@ const Sidebar = ({
   const isCreating = useSelector((state) => state.chat.creating);
 
   const dispatch = useDispatch();
+  const navigateTo = useNavigate()
 
   const handleChatSelect = (selectedChatId) => {
     onchatselect(selectedChatId);
@@ -98,6 +102,11 @@ const Sidebar = ({
   const handleDeleteChat = async (chatID) => {
     await dispatch(deleteChat(chatID));
     onchatselect(null);
+  };
+
+  const handleLogout = async () => {
+    await dispatch(logOutUser());
+    navigateTo("/login");
   };
 
   return (
@@ -254,14 +263,16 @@ const Sidebar = ({
             variant="ghost"
             className="w-full justify-start text-gray-400 hover:bg-[#2a2a2a] hover:text-white rounded-lg h-10 transition-all duration-200"
           >
-            <Trash2 size={16} className="mr-3" /> Clear conversations
+            <Settings size={16} className="mr-3" /> Settings
           </Button>
           <Button
             variant="ghost"
             className="w-full justify-start text-gray-400 hover:bg-[#2a2a2a] hover:text-white rounded-lg h-10 transition-all duration-200"
+            onClick={handleLogout}
           >
-            <Settings size={16} className="mr-3" /> Settings
+            <LogOut size={16} className="mr-3" /> Log Out
           </Button>
+
           <div className="p-3 rounded-lg hover:bg-[#2a2a2a] transition-all duration-200 cursor-pointer flex items-center gap-3">
             <Avatar className="w-8 h-8">
               <AvatarImage
