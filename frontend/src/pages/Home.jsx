@@ -29,7 +29,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const tempSocket = io("http://localhost:3000", {
+    const tempSocket = io("https://nebula-1jpx.onrender.com", {
       withCredentials: true,
     });
 
