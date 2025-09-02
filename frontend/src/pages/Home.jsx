@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { createChat, getChats } from "../store/actions/chatActions";
 import { appendMessage, replaceMessage } from "../store/features/chatSlice";
 import { nanoid } from "@reduxjs/toolkit";
-import NavBar from "../components/layout/NavBar";
 
 const Home = () => {
   const chats = useSelector((state) => state.chat.chats);
@@ -25,10 +24,9 @@ const Home = () => {
 
   const messages = useSelector((state) => state.chat.messages[chatID]);
 
-  async function getUserDetails() {
-    await dispatch(getUser());
+  const getUserChats = async () => {
     await dispatch(getChats());
-  }
+  };
 
   useEffect(() => {
     const tempSocket = io("http://localhost:3000", {
@@ -88,8 +86,7 @@ const Home = () => {
       );
     });
     setSocket(tempSocket);
-
-    getUserDetails();
+    getUserChats();
   }, []);
 
   const handleSendMessage = async (content) => {

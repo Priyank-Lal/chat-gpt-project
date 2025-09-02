@@ -34,48 +34,39 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EmptyState = ({ onNewChat }) => (
-  <div className="flex flex-col items-center justify-center h-full text-center p-8 max-w-2xl mx-auto">
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="mb-8"
-    >
-      <div className="w-16 h-16 bg-[#2a2a2a] rounded-full flex items-center justify-center mb-6">
-        <Bot size={32} className="text-white" />
-      </div>
-    </motion.div>
-    <motion.h2
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-      className="text-2xl font-normal text-white mb-4"
-    >
-      How can I help you today?
-    </motion.h2>
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-      className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-lg"
-    >
-      {[
-        "Create a workout plan",
-        "Write a Python script",
-        "Plan a trip to Japan",
-        "Explain quantum computing",
-      ].map((suggestion, index) => (
-        <motion.button
-          key={index}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="p-4 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-xl text-sm text-white border border-[#3a3a3a] hover:border-[#4a4a4a] transition-all duration-200 text-left"
-          onClick={() => onNewChat && onNewChat()}
-        >
-          {suggestion}
-        </motion.button>
-      ))}
-    </motion.div>
+  <div className="mt-50">
+    <div className="flex flex-col items-center justify-center h-full text-center p-8 max-w-2xl mx-auto ">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="mb-8"
+      >
+        <div className="w-24 h-24 bg-[#2a2a2a] rounded-full flex items-center justify-center mb-6">
+          <img src="../../../icons8-ai.svg" className="w-12 h-12" alt="" />{" "}
+        </div>
+      </motion.div>
+      <motion.h2
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+        className="text-2xl font-normal text-white mb-4"
+      >
+        Welcome to Nebula!
+      </motion.h2>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+        className="w-full max-w-lg"
+      >
+        <p className="text-white text-xl opacity-80 mb-2">
+          Nebula is your intelligent AI assistant, ready to help with your
+          questions, ideas, and projects. Just type your message below to get
+          started.
+        </p>
+      </motion.div>
+    </div>
   </div>
 );
 
@@ -196,18 +187,16 @@ const ChatArea = ({
                           <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
                             {/* Error message display */}
                             {message.role === "error" ? (
-
-                                <Alert
-                                  variant="destructive"
-                                  className="px-4 py-2 rounded-2xl shadow text-sm max-w-xl"
-                                >
-                                  <AlertCircleIcon />
-                                  <AlertTitle>Error Occured</AlertTitle>
-                                  <AlertDescription>
-                                    {message.content}
-                                  </AlertDescription>
-                                </Alert>
-
+                              <Alert
+                                variant="destructive"
+                                className="px-4 py-2 rounded-2xl shadow text-sm max-w-xl"
+                              >
+                                <AlertCircleIcon />
+                                <AlertTitle>Error Occured</AlertTitle>
+                                <AlertDescription>
+                                  {message.content}
+                                </AlertDescription>
+                              </Alert>
                             ) : message.file ? (
                               <>
                                 <img

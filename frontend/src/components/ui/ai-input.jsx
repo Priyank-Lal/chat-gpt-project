@@ -5,6 +5,8 @@ import { Globe, Paperclip, Plus, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 
+
+
 function useAutoResizeTextarea({ minHeight, maxHeight }) {
   const textareaRef = useRef(null);
   const adjustHeight = useCallback(
@@ -101,8 +103,39 @@ export default function AiInput({
   };
 
   const handleFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 1) {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      setImagePreview(null);
+      setSelectedFile(null);
+      setFileUrl(null);
+      return;
+    }
+
     const file = e.target.files ? e.target.files[0] : null;
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        setImagePreview(null);
+        setSelectedFile(null);
+        setFileUrl(null);
+        return;
+      }
+      // Validate file size (max 10 MB)
+      if (file.size > 10 * 1024 * 1024) {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        setImagePreview(null);
+        setSelectedFile(null);
+        setFileUrl(null);
+        return;
+      }
+
       const previewUrl = URL.createObjectURL(file);
 
       setImagePreview(previewUrl);

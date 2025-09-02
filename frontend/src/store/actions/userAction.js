@@ -1,5 +1,5 @@
 import api from "../../api/api";
-import { loadUser, logoutUser } from "../features/userSlice";
+import { loadUser, logoutUser, setUserLoading } from "../features/userSlice";
 import { toast } from "sonner";
 
 export const registerUser = (userDetails) => async (dispatch, getState) => {
@@ -48,12 +48,16 @@ export const loginUser = (userDetails) => async (dispatch, getState) => {
 };
 
 export const getUser = () => async (dispatch) => {
+  dispatch(setUserLoading(true));
+
   try {
     const { data } = await api.get("/api/user");
     dispatch(loadUser(data.user));
   } catch (error) {
     console.log(error);
     toast("Failed to load user data. Please try again.");
+  } finally {
+    dispatch(setUserLoading(false));
   }
 };
 
