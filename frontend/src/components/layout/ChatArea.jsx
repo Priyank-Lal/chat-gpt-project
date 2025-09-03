@@ -121,7 +121,7 @@ const ChatArea = ({
         className
       )}
     >
-      {/* Header for mobile */}
+
       <div className="lg:hidden bg-[#1a1a1a] border-b border-[#3a3a3a] p-4 flex items-center gap-3 sticky top-0 z-10">
         <button
           className="p-2 hover:bg-[#2a2a2a] rounded-lg transition-all duration-200"
@@ -132,7 +132,7 @@ const ChatArea = ({
         <h1 className="text-lg font-semibold text-white truncate">ChatGPT</h1>
       </div>
 
-      {/* Messages container */}
+
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {displayMessages.length === 0 && !isTyping ? (
@@ -154,10 +154,10 @@ const ChatArea = ({
                     className="group"
                   >
                     {message.role === "user" ? (
-                      // User message with small avatar + separate bubble
+
                       <div className="flex justify-end mb-4">
                         <div className="flex flex-col items-end gap-2 max-w-[80%]">
-                          {/* Small user image/avatar */}
+
                           {message.file === true && (
                             <img
                               src={message.fileUrl}
@@ -166,7 +166,7 @@ const ChatArea = ({
                             />
                           )}
 
-                          {/* Message bubble */}
+
                           <div className="bg-[#2f2f2f] text-white px-4 py-3 rounded-2xl rounded-br-md shadow-sm">
                             <div className="text-sm leading-relaxed whitespace-pre-wrap text-white">
                               {message.content}
@@ -175,7 +175,7 @@ const ChatArea = ({
                         </div>
                       </div>
                     ) : (
-                      // AI message with flat design
+
                       <div className="flex items-start gap-3 mb-6">
                         {/* <BotAvatar /> */}
                         <img
@@ -265,7 +265,7 @@ const ChatArea = ({
                               </motion.div>
                             )}
                           </div>
-                          {/* Action buttons */}
+
                           <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <button
                               className="p-1 px-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
@@ -304,7 +304,7 @@ const ChatArea = ({
                               className="p-1 px-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
                               onClick={() => {
                                 setReactions((prev) => {
-                                  // If thumbs up is active, clear it; else set to up and clear down if present
+
                                   if (prev[message._id] === "up") {
                                     return { ...prev, [message._id]: null };
                                   } else {
@@ -328,7 +328,7 @@ const ChatArea = ({
                               className="p-1 px-2 hover:bg-[#2a2a2a] rounded-lg text-gray-400 hover:text-white transition-all duration-200"
                               onClick={() => {
                                 setReactions((prev) => {
-                                  // If thumbs down is active, clear it; else set to down and clear up if present
+
                                   if (prev[message._id] === "down") {
                                     return { ...prev, [message._id]: null };
                                   } else {
@@ -361,7 +361,7 @@ const ChatArea = ({
                 ))}
               </AnimatePresence>
 
-              {/* Show typing dots loader */}
+
               {(isTyping || loadingMessage) && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -405,7 +405,7 @@ const ChatArea = ({
                   <div className="h-110 w-110 rounded-lg bg-[#2a2a2a] animate-pulse border border-[#3a3a3a]" />
                 </motion.div>
               )}
-              {/* Typing Indicator */}
+
               {isTyping && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
